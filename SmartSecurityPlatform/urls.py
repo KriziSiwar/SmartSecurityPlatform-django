@@ -1,5 +1,6 @@
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import path, include, re_path
+from django.views.generic import TemplateView
 from main.views import (
     dashboard_view,
     login_view,
@@ -10,14 +11,12 @@ from main.views import (
 urlpatterns = [
     path('admin/', admin.site.urls),
 
-    # Authentification
-    path('login/', login_view, name='login'),
-    path('register/', register_view, name='register'),
-    path('logout/', logout_view, name='logout'),
+    # API URLs
+    path('api/', include('main.api_urls')),
 
-    # Tableau de bord
-    path('dashboard/', dashboard_view, name='dashboard'),
-
-    # URLs supplémentaires du module principal
+    # Template URLs (for backward compatibility)
     path('', include('main.urls')),
+
+    # React app - catch all for frontend
+    re_path(r'^(?!api/).*$', TemplateView.as_view(template_name='index.html'), name='react_app'),
 ]
