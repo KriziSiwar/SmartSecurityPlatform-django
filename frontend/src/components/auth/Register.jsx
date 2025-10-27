@@ -55,15 +55,52 @@ const Register = () => {
   };
 
   return (
-    <Container component="main" maxWidth="sm">
-      <Box
-        sx={{
-          marginTop: 8,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-        }}
-      >
+    <Box sx={{
+      minHeight: '100vh',
+      backgroundImage: 'url(/background.png)',
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+      backgroundRepeat: 'no-repeat',
+      backgroundAttachment: 'fixed',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      '&::before': {
+        content: '""',
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: 'rgba(245, 247, 250, 0.85)',
+        zIndex: -1,
+      },
+    }}>
+      <Container component="main" maxWidth="sm" sx={{ position: 'relative', zIndex: 1 }}>
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+          }}
+        >
+        <Box sx={{ mb: 2, textAlign: 'center' }}>
+          <img
+            src="/logo.jpg"
+            alt="Smart Security Logo"
+            style={{
+              height: 60,
+              width: 'auto',
+              marginBottom: 16,
+              borderRadius: 8,
+              filter: 'brightness(1.1)',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
+            }}
+          />
+          <Typography component="h1" variant="h4" sx={{ fontWeight: 600, color: '#1E3A8A' }}>
+            Plateforme de Sécurité
+          </Typography>
+        </Box>
         <Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}>
           <PersonAddOutlinedIcon />
         </Avatar>
@@ -176,8 +213,9 @@ const Register = () => {
             </Grid>
           </Box>
         </Paper>
-      </Box>
-    </Container>
+        </Box>
+      </Container>
+    </Box>
   );
 };
 

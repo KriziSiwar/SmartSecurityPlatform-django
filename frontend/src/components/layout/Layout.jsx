@@ -60,23 +60,59 @@ const Layout = () => {
     navigate('/login');
   };
 
-  const menuItems = [
-    { text: 'Dashboard', icon: <DashboardIcon />, path: '/' },
-    { text: 'Sites', icon: <BusinessIcon />, path: '/sites' },
-    { text: 'Alertes', icon: <WarningIcon />, path: '/alerts' },
-    { text: 'Caméras', icon: <VideocamIcon />, path: '/cameras' },
-    { text: 'Capteurs', icon: <SensorsIcon />, path: '/sensors' },
-    { text: 'Événements', icon: <EventIcon />, path: '/events' },
-    { text: 'Rapports', icon: <AssessmentIcon />, path: '/reports' },
-    { text: 'Maintenances', icon: <BuildIcon />, path: '/maintenances' },
-  ];
+  const getMenuItems = () => {
+    const baseItems = [
+      { text: 'Dashboard', icon: <DashboardIcon />, path: '/' },
+    ];
+
+    if (user?.role === 'admin') {
+      return [
+        ...baseItems,
+        { text: 'Sites', icon: <BusinessIcon />, path: '/sites' },
+        { text: 'Alertes', icon: <WarningIcon />, path: '/alerts' },
+        { text: 'Caméras', icon: <VideocamIcon />, path: '/cameras' },
+        { text: 'Capteurs', icon: <SensorsIcon />, path: '/sensors' },
+        { text: 'Événements', icon: <EventIcon />, path: '/events' },
+        { text: 'Rapports', icon: <AssessmentIcon />, path: '/reports' },
+        { text: 'Maintenances', icon: <BuildIcon />, path: '/maintenances' },
+      ];
+    } else if (user?.role === 'technicien') {
+      return [
+        ...baseItems,
+        { text: 'Mes Maintenances', icon: <BuildIcon />, path: '/maintenances' },
+        { text: 'Événements', icon: <EventIcon />, path: '/events' },
+        { text: 'Rapports', icon: <AssessmentIcon />, path: '/reports' },
+      ];
+    } else if (user?.role === 'client') {
+      return [
+        ...baseItems,
+        { text: 'Mes Sites', icon: <BusinessIcon />, path: '/sites' },
+        { text: 'Mes Alertes', icon: <WarningIcon />, path: '/alerts' },
+        { text: 'Rapports', icon: <AssessmentIcon />, path: '/reports' },
+      ];
+    }
+
+    return baseItems;
+  };
+
+  const menuItems = getMenuItems();
 
   const drawer = (
     <div>
       <Toolbar>
-        <Typography variant="h6" noWrap component="div">
-          Smart Security
-        </Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center', mr: 2 }}>
+          <img
+            src="/logo.jpg"
+            alt="Smart Security Logo"
+            style={{
+              height: 50,
+              width: 'auto',
+              borderRadius: 4,
+              filter: 'brightness(1.1)',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+            }}
+          />
+        </Box>
       </Toolbar>
       <Divider />
       <List>
@@ -113,6 +149,8 @@ const Layout = () => {
         sx={{
           width: { sm: `calc(100% - ${drawerWidth}px)` },
           ml: { sm: `${drawerWidth}px` },
+          backgroundColor: '#1E3A8A', // Dark Slate Blue
+          boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
         }}
       >
         <Toolbar>
@@ -125,7 +163,7 @@ const Layout = () => {
           >
             <MenuIcon />
           </IconButton>
-          <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
+          <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1, fontWeight: 500 }}>
             Plateforme de Sécurité Intelligente
           </Typography>
 
@@ -182,7 +220,12 @@ const Layout = () => {
           }}
           sx={{
             display: { xs: 'block', sm: 'none' },
-            '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth },
+            '& .MuiDrawer-paper': {
+              boxSizing: 'border-box',
+              width: drawerWidth,
+              backgroundColor: '#1E3A8A', // Dark Slate Blue
+              color: '#ffffff',
+            },
           }}
         >
           {drawer}
@@ -191,7 +234,12 @@ const Layout = () => {
           variant="permanent"
           sx={{
             display: { xs: 'none', sm: 'block' },
-            '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth },
+            '& .MuiDrawer-paper': {
+              boxSizing: 'border-box',
+              width: drawerWidth,
+              backgroundColor: '#1E3A8A', // Dark Slate Blue
+              color: '#ffffff',
+            },
           }}
           open
         >
