@@ -4,14 +4,18 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.db.models import Q, Count
 from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
 from .forms import (
-    RegisterForm, LoginForm, SiteClientForm, SiteClientSearchForm, 
+    RegisterForm, LoginForm, SiteClientForm, SiteClientSearchForm,
     AlerteForm, AlerteFilterForm, CameraSurveillanceForm, CameraFilterForm,
     CapteurForm, CapteurFilterForm, EvenementForm, EvenementFilterForm,
     RapportSurveillanceForm, RapportFilterForm, MaintenanceForm, MaintenanceFilterForm
 )
 from .models import (
-    SiteClient, Alerte, Evenement, CustomUser, CameraSurveillance, 
+    SiteClient, Alerte, Evenement, CustomUser, CameraSurveillance,
     Capteur, RapportSurveillance, Maintenance
 )
 
@@ -702,6 +706,46 @@ def maintenance_detail(request, pk):
     maintenance = get_object_or_404(Maintenance.objects.select_related('site'), pk=pk)
     context = {'maintenance': maintenance}
     return render(request, 'maintenance/maintenance_detail.html', context)
+
+# ========== API IA CLASSIFICATION ==========
+@csrf_exempt
+@require_POST
+def train_classifier(request):
+    """Endpoint pour réentraîner le classifieur - SANS AUTH"""
+    try:
+        from .ai_classifier import AlertClassifier
+        from .training_data import get_training_data
+
+        print("🔄 Réentraînement du modèle IA...")
+
+        # Réinitialiser et réentraîner le classifieur
+        classifier = AlertClassifier()
+        classifier.initialize_classifier()
+
+        # Récupérer les statistiques
+        data = get_training_data()
+        categories = {}
+        for item in data:
+            cat = item['category']
+            categories[cat] = categories.get(cat, 0) + 1
+
+        print(f"✅ Modèle réentraîné avec {len(data)} exemples")
+
+        return JsonResponse({
+            'status': 'success',
+            'message': 'Modèle IA réentraîné avec succès!',
+            'training_samples': len(data),
+            'categories_distribution': categories,
+            'model_type': 'Naive Bayes Multinomial',
+            'features': 'TF-IDF Vectorizer'
+        })
+
+    except Exception as e:
+        print(f"❌ Erreur: {str(e)}")
+        return JsonResponse({
+            'status': 'error',
+            'message': f'Erreur: {str(e)}'
+        }, status=500)
 
 @login_required
 def maintenance_create(request):

@@ -30,6 +30,7 @@ import ReportForm from './components/reports/ReportForm';
 import MaintenancesList from './components/maintenances/MaintenancesList';
 import MaintenanceDetail from './components/maintenances/MaintenanceDetail';
 import MaintenanceForm from './components/maintenances/MaintenanceForm';
+import AITestPage from './components/ai/AITestPage';
 import Layout from './components/layout/Layout';
 import './App.css';
 
@@ -142,7 +143,7 @@ function App() {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <AuthProvider>
-        <Router>
+        <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
@@ -180,6 +181,7 @@ function App() {
               <Route path="maintenances/new" element={<MaintenanceForm />} />
               <Route path="maintenances/:id" element={<MaintenanceDetail />} />
               <Route path="maintenances/:id/edit" element={<MaintenanceForm />} />
+              <Route path="ai-test" element={<AITestPage />} />
             </Route>
           </Routes>
         </Router>

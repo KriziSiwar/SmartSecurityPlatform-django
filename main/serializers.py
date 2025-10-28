@@ -65,9 +65,24 @@ class AlerteSerializer(serializers.ModelSerializer):
     destinataire_nom = serializers.CharField(source='destinataire.username', read_only=True)
     site_nom = serializers.CharField(source='evenement.site.nom', read_only=True)
 
+    # Champs IA en lecture seule
+    categorie_ia_display = serializers.CharField(source='get_categorie_ia_display', read_only=True)
+    confiance_ia_percentage = serializers.SerializerMethodField()
+
     class Meta:
         model = Alerte
         fields = '__all__'
+
+    def get_confiance_ia_percentage(self, obj):
+        if obj.confiance_ia:
+            return round(obj.confiance_ia * 100, 2)
+        return None
+
+    def create(self, validated_data):
+        alerte = super().create(validated_data)
+        # Classifier automatiquement avec l'IA après création
+        alerte.classifier_avec_ia()
+        return alerte
 
 
 class RapportSurveillanceSerializer(serializers.ModelSerializer):
@@ -120,4 +135,4 @@ class DashboardStatsSerializer(serializers.Serializer):
     alertes_critiques = serializers.IntegerField()
     maintenances_planifiees = serializers.IntegerField()
     unread_alerts_count = serializers.IntegerField()
-    user_alerts_count = serializers.IntegerField()
+    user_alerts_count = serializers.IntegerField() 

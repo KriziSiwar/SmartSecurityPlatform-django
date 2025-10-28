@@ -152,35 +152,117 @@ class Alerte(models.Model):
         ('moyen', 'Moyen'),
         ('info', 'Info'),
     )
-    
+
     STATUT_CHOICES = (
         ('envoyee', 'Envoyée'),
         ('lue', 'Lue'),
         ('archivee', 'Archivée'),
     )
-    
+
+    CATEGORIE_CHOICES = (
+        ('intrusion', 'Intrusion'),
+        ('incendie', 'Incendie'),
+        ('technique', 'Problème Technique'),
+        ('fausse_alerte', 'Fausse Alerte'),
+        ('autre', 'Autre'),
+    )
+
     evenement = models.ForeignKey(Evenement, on_delete=models.CASCADE, verbose_name="Événement")
     message = models.TextField(verbose_name="Message de l'alerte")
     niveau = models.CharField(max_length=50, choices=NIVEAU_CHOICES, default='info', verbose_name="Niveau")
     date_envoi = models.DateTimeField(auto_now_add=True, verbose_name="Date d'envoi")
     destinataire = models.ForeignKey(CustomUser, on_delete=models.CASCADE, verbose_name="Destinataire")
     statut = models.CharField(max_length=50, choices=STATUT_CHOICES, default='envoyee', verbose_name="Statut")
-    
+
+    # Champs IA
+    categorie_ia = models.CharField(max_length=50, choices=CATEGORIE_CHOICES, blank=True, null=True, verbose_name="Catégorie IA")
+    actions_recommandees = models.JSONField(blank=True, null=True, verbose_name="Actions recommandées")
+    confiance_ia = models.DecimalField(max_digits=5, decimal_places=4, blank=True, null=True, verbose_name="Confiance IA")
+    explication_ia = models.TextField(blank=True, null=True, verbose_name="Explication IA")
+
     class Meta:
         verbose_name = "Alerte"
         verbose_name_plural = "Alertes"
         ordering = ['-date_envoi']
-    
+
     def __str__(self):
         return f"Alerte {self.niveau} - {self.destinataire.username}"
-    
+
     def marquer_comme_lue(self):
         self.statut = 'lue'
         self.save()
-    
+
     def archiver(self):
         self.statut = 'archivee'
         self.save()
+
+    def classifier_avec_ia(self):
+        """
+        Méthode pour classifier l'alerte avec l'IA
+        """
+        from .ml_classifier import predict_alert_category
+
+        if not self.message:
+            return
+
+        try:
+            prediction = predict_alert_category(self.message)
+
+            # Mapper les catégories IA aux choix du modèle
+            categorie_mapping = {
+                'intrusion': 'intrusion',
+                'incendie': 'incendie',
+                'technique': 'technique',
+                'fausse_alerte': 'fausse_alerte',
+                'autre': 'autre'
+            }
+
+            self.categorie_ia = categorie_mapping.get(prediction.get('categorie', 'autre'), 'autre')
+            self.confiance_ia = prediction.get('confiance', 0) / 100.0  # Convertir en décimal
+            self.explication_ia = prediction.get('explication', '')
+
+            # Définir les actions recommandées selon la catégorie
+            actions_par_categorie = {
+                'intrusion': [
+                    'Vérifier les caméras de surveillance',
+                    'Contacter les forces de l\'ordre',
+                    'Déclencher l\'alarme sonore',
+                    'Verrouiller les accès'
+                ],
+                'incendie': [
+                    'Activer l\'alarme incendie immédiatement',
+                    'Contacter les pompiers (198)',
+                    'Évacuer le site',
+                    'Vérifier les détecteurs de fumée'
+                ],
+                'technique': [
+                    'Vérifier les connexions réseau',
+                    'Redémarrer l\'équipement',
+                    'Contacter le support technique',
+                    'Planifier une maintenance'
+                ],
+                'fausse_alerte': [
+                    'Vérifier manuellement la situation',
+                    'Recalibrer les capteurs si nécessaire',
+                    'Analyser les logs système'
+                ],
+                'autre': [
+                    'Analyser la situation',
+                    'Contacter le responsable de site'
+                ]
+            }
+
+            self.actions_recommandees = actions_par_categorie.get(self.categorie_ia, [])
+            self.save()
+
+        except Exception as e:
+            print(f"Erreur lors de la classification IA: {e}")
+            # En cas d'erreur, définir des valeurs par défaut
+            self.categorie_ia = 'autre'
+            self.actions_recommandees = ['Analyser la situation']
+            self.confiance_ia = 0.0
+            self.explication_ia = 'Erreur de classification IA'
+            self.save()
 
 
 # ========== MODULE SANA : RapportSurveillance ==========

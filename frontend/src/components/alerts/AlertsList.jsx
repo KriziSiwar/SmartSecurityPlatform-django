@@ -40,6 +40,7 @@ const AlertsList = () => {
     niveau: '',
     statut: '',
     destinataire: '',
+    categorie_ia: '',
   });
   const navigate = useNavigate();
   const { userRole, userId } = useAuth();
@@ -54,6 +55,7 @@ const AlertsList = () => {
       if (filters.niveau) params.append('niveau', filters.niveau);
       if (filters.statut) params.append('statut', filters.statut);
       if (filters.destinataire) params.append('destinataire', filters.destinataire);
+      if (filters.categorie_ia) params.append('categorie_ia', filters.categorie_ia);
 
       const response = await axios.get(`http://localhost:8000/api/alertes/?${params}`);
       const data = response.data.results || response.data;
@@ -136,6 +138,23 @@ const AlertsList = () => {
     }
   };
 
+  const getCategorieIaColor = (categorie) => {
+    switch (categorie) {
+      case 'intrusion':
+        return 'error';
+      case 'incendie':
+        return 'warning';
+      case 'technique':
+        return 'info';
+      case 'fausse_alerte':
+        return 'success';
+      case 'autre':
+        return 'default';
+      default:
+        return 'default';
+    }
+  };
+
   if (loading) {
     return <Typography>Chargement...</Typography>;
   }
@@ -209,6 +228,21 @@ const AlertsList = () => {
             </Select>
           </FormControl>
           <FormControl size="small" sx={{ minWidth: 150 }}>
+            <InputLabel>Catégorie IA</InputLabel>
+            <Select
+              value={filters.categorie_ia || ''}
+              label="Catégorie IA"
+              onChange={(e) => handleFilterChange('categorie_ia', e.target.value)}
+            >
+              <MenuItem value="">Toutes</MenuItem>
+              <MenuItem value="intrusion">Intrusion</MenuItem>
+              <MenuItem value="incendie">Incendie</MenuItem>
+              <MenuItem value="technique">Problème Technique</MenuItem>
+              <MenuItem value="fausse_alerte">Fausse Alerte</MenuItem>
+              <MenuItem value="autre">Autre</MenuItem>
+            </Select>
+          </FormControl>
+          <FormControl size="small" sx={{ minWidth: 150 }}>
             <InputLabel>Statut</InputLabel>
             <Select
               value={filters.statut}
@@ -230,6 +264,8 @@ const AlertsList = () => {
             <TableRow>
               <TableCell>Événement</TableCell>
               <TableCell>Niveau</TableCell>
+              <TableCell>Catégorie IA</TableCell>
+              <TableCell>Actions IA</TableCell>
               <TableCell>Statut</TableCell>
               <TableCell>Destinataire</TableCell>
               <TableCell>Site</TableCell>
@@ -247,6 +283,37 @@ const AlertsList = () => {
                     color={getNiveauColor(alert.niveau)}
                     size="small"
                   />
+                </TableCell>
+                <TableCell>
+                  {alert.categorie_ia ? (
+                    <Chip
+                      label={alert.categorie_ia_display || alert.categorie_ia}
+                      color={getCategorieIaColor(alert.categorie_ia)}
+                      size="small"
+                      sx={{ fontSize: '0.75rem' }}
+                    />
+                  ) : (
+                    <Typography variant="body2" color="text.secondary">
+                      Non classifiée
+                    </Typography>
+                  )}
+                </TableCell>
+                <TableCell>
+                  {alert.actions_recommandees && alert.actions_recommandees.length > 0 ? (
+                    <Box>
+                      <Typography variant="body2" sx={{ fontWeight: 'bold', mb: 0.5 }}>
+                        {alert.actions_recommandees.length} action(s)
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        {alert.actions_recommandees.slice(0, 2).join(', ')}
+                        {alert.actions_recommandees.length > 2 && '...'}
+                      </Typography>
+                    </Box>
+                  ) : (
+                    <Typography variant="body2" color="text.secondary">
+                      Aucune
+                    </Typography>
+                  )}
                 </TableCell>
                 <TableCell>
                   <Chip

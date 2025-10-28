@@ -1,6 +1,3 @@
-from django.urls import path, include
-from rest_framework.routers import DefaultRouter
-from . import views, api_views
 from django.urls import path
 from .views import (
     register_view, login_view, logout_view, dashboard_view,
@@ -14,15 +11,16 @@ from .views import (
     # Capteur views
     capteur_list, capteur_detail, capteur_create, capteur_update, capteur_delete,
     # Evenement views
-    evenement_list, evenement_detail, evenement_create, evenement_update, 
+    evenement_list, evenement_detail, evenement_create, evenement_update,
     evenement_delete, evenement_resoudre,
     # RapportSurveillance views
     rapport_list, rapport_detail, rapport_create, rapport_update, rapport_delete,
     # Maintenance views
-    maintenance_list, maintenance_detail, maintenance_create, maintenance_update, maintenance_delete
+    maintenance_list, maintenance_detail, maintenance_create, maintenance_update, maintenance_delete,
+    # API IA Classification
+    train_classifier
 )
 
-# Template URLs (for backward compatibility, not used by React)
 urlpatterns = [
     # ========== URLs AUTHENTIFICATION ==========
     path('register/', register_view, name='register'),
@@ -84,4 +82,7 @@ urlpatterns = [
     path('maintenances/<int:pk>/', maintenance_detail, name='maintenance_detail'),
     path('maintenances/<int:pk>/modifier/', maintenance_update, name='maintenance_update'),
     path('maintenances/<int:pk>/supprimer/', maintenance_delete, name='maintenance_delete'),
+
+    # ========== API IA Classification ==========
+    path('api/alertes/train-classifier/', train_classifier, name='train_classifier'),
 ]

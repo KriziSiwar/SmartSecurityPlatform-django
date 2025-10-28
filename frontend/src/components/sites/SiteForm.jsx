@@ -16,10 +16,12 @@ import {
 } from '@mui/material';
 import { Save as SaveIcon, ArrowBack as ArrowBackIcon } from '@mui/icons-material';
 import axios from 'axios';
+import { useAuth } from '../../contexts/AuthContext';
 
 const SiteForm = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { userRole } = useAuth();
   const isEditing = Boolean(id);
 
   const [formData, setFormData] = useState({
@@ -62,6 +64,13 @@ const SiteForm = () => {
     setLoading(true);
     setError('');
     setSuccess('');
+
+    // Check permissions for creation
+    if (!isEditing && userRole !== 'admin') {
+      setError('Vous n\'avez pas la permission de créer un site. Seuls les administrateurs peuvent créer des sites.');
+      setLoading(false);
+      return;
+    }
 
     try {
       if (isEditing) {

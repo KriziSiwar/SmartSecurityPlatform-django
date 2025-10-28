@@ -75,6 +75,7 @@ const Layout = () => {
         { text: 'Événements', icon: <EventIcon />, path: '/events' },
         { text: 'Rapports', icon: <AssessmentIcon />, path: '/reports' },
         { text: 'Maintenances', icon: <BuildIcon />, path: '/maintenances' },
+        { text: 'Test IA', icon: <AssessmentIcon />, path: '/ai-test' },
       ];
     } else if (user?.role === 'technicien') {
       return [

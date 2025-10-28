@@ -20,4 +20,5 @@ urlpatterns = [
    path('auth/users/', api_views.users_list, name='api_users'),
    path('auth/techniciens/', api_views.techniciens_list, name='api_techniciens'),
    path('dashboard/stats/', api_views.dashboard_stats, name='api_dashboard_stats'),
+   path('alertes/train-classifier/', api_views.train_classifier, name='train_classifier'),
 ]
