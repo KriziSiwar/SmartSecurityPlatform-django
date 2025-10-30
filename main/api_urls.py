@@ -1,6 +1,7 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from . import api_views
+from .ai_services.views import AnomalyDetectionAPI, TrainAnomalyDetectorAPI
 
 # API URLs
 router = DefaultRouter()
@@ -18,6 +19,10 @@ urlpatterns = [
    path('auth/register/', api_views.register_view, name='api_register'),
    path('auth/me/', api_views.current_user_view, name='api_current_user'),
    path('auth/users/', api_views.users_list, name='api_users'),
+   
+   # IA Endpoints
+   path('ai/detect-anomaly/', AnomalyDetectionAPI.as_view(), name='ai_detect_anomaly'),
+   path('ai/train-detector/', TrainAnomalyDetectorAPI.as_view(), name='ai_train_detector'),
    path('auth/techniciens/', api_views.techniciens_list, name='api_techniciens'),
    path('dashboard/stats/', api_views.dashboard_stats, name='api_dashboard_stats'),
    path('alertes/train-classifier/', api_views.train_classifier, name='train_classifier'),

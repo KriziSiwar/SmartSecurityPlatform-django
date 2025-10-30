@@ -18,6 +18,7 @@ import {
   Sensors as SensorsIcon,
 } from '@mui/icons-material';
 import axios from 'axios';
+import CameraAnomalyDetection from '../camera/CameraAnomalyDetection';
 
 const Dashboard = () => {
   const [stats, setStats] = useState(null);
@@ -160,6 +161,43 @@ const Dashboard = () => {
             <Typography variant="body2" color="text.secondary">
               Total de vos alertes: {stats?.user_alerts_count || 0}
             </Typography>
+          </Paper>
+        </Grid>
+      </Grid>
+
+      {/* Section Détection d'Anomalies */}
+      <Grid container spacing={3} sx={{ mt: 2 }}>
+        <Grid item xs={12}>
+          <Paper sx={{ p: 3, mt: 3 }}>
+            <Box display="flex" alignItems="center" mb={3}>
+              <VideocamIcon color="primary" sx={{ fontSize: 32, mr: 2 }} />
+              <Box>
+                <Typography variant="h5" component="h2" color="primary">
+                  Détection d'Anomalies en Temps Réel
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Activez votre caméra pour détecter des objets et des comportements suspects
+                </Typography>
+              </Box>
+            </Box>
+            
+            <Box sx={{ 
+              border: '2px dashed', 
+              borderColor: 'divider', 
+              borderRadius: 2, 
+              p: 3, 
+              textAlign: 'center',
+              minHeight: '300px',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'center',
+              backgroundColor: 'background.paper'
+            }}>
+              <CameraAnomalyDetection 
+                cameraId="dashboard-cam-1" 
+                cameraName="Caméra de surveillance"
+              />
+            </Box>
           </Paper>
         </Grid>
       </Grid>

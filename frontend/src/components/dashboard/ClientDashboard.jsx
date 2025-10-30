@@ -22,8 +22,10 @@ import {
   Assessment as AssessmentIcon,
   Notifications as NotificationsIcon,
   Security as SecurityIcon,
+  Videocam as VideocamIcon,
 } from '@mui/icons-material';
 import axios from 'axios';
+import CameraAnomalyDetection from '../camera/CameraAnomalyDetection';
 
 const ClientDashboard = () => {
   const [stats, setStats] = useState(null);
@@ -45,7 +47,11 @@ const ClientDashboard = () => {
   };
 
   if (loading) {
-    return <Typography>Chargement...</Typography>;
+    return (
+      <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+        <Typography>Chargement...</Typography>
+      </Container>
+    );
   }
 
   const statCards = [
@@ -151,6 +157,76 @@ const ClientDashboard = () => {
             </Card>
           </Grid>
         ))}
+      </Grid>
+
+      <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+        <Grid container spacing={3}>
+          {/* Stats Cards */}
+          <Grid item xs={12} md={6} lg={3}>
+            <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column', height: '100%' }}>
+              <Box display="flex" alignItems="center" mb={1}>
+                <BusinessIcon color="primary" sx={{ mr: 1 }} />
+                <Typography component="h2" variant="h6" color="primary" gutterBottom>
+                  Sites surveillés
+                </Typography>
+              </Box>
+              <Typography component="p" variant="h4">
+                {stats.sites_count}
+              </Typography>
+            </Paper>
+          </Grid>
+          
+          {/* Ajout de la détection d'anomalies */}
+          <Grid item xs={12}>
+            <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column' }}>
+              <Box display="flex" alignItems="center" mb={2}>
+                <VideocamIcon color="primary" sx={{ mr: 1 }} />
+                <Typography component="h2" variant="h6" color="primary">
+                  Détection d'anomalies en temps réel
+                </Typography>
+              </Box>
+              <CameraAnomalyDetection 
+                cameraId="webcam-1" 
+                cameraName="Caméra de surveillance"
+              />
+            </Paper>
+          </Grid>
+        </Grid>
+      </Container>
+
+      {/* Section Détection d'Anomalies */}
+      <Grid item xs={12} sx={{ mt: 4, mb: 2 }}>
+        <Paper sx={{ p: 3, borderRadius: 2, boxShadow: 3 }}>
+          <Box display="flex" alignItems="center" mb={3}>
+            <VideocamIcon color="primary" sx={{ fontSize: 32, mr: 2 }} />
+            <Box>
+              <Typography variant="h5" component="h2" color="primary">
+                Détection d'Anomalies en Temps Réel
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Activez votre caméra pour détecter des objets et des comportements suspects
+              </Typography>
+            </Box>
+          </Box>
+          
+          <Box sx={{ 
+            border: '2px dashed', 
+            borderColor: 'divider', 
+            borderRadius: 2, 
+            p: 3, 
+            textAlign: 'center',
+            minHeight: '300px',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            backgroundColor: 'background.paper'
+          }}>
+            <CameraAnomalyDetection 
+              cameraId="webcam-1" 
+              cameraName="Ma Caméra de Surveillance"
+            />
+          </Box>
+        </Paper>
       </Grid>
 
       <Grid container spacing={3} sx={{ mt: 2 }}>

@@ -1,0 +1,402 @@
+import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { Button, message, Spin, Alert, Typography } from 'antd';
+import { CameraOutlined, StopOutlined } from '@ant-design/icons';
+import api from '../../utils/axiosConfig';
+
+const CameraAnomalyDetection = ({ cameraId, cameraName, streamUrl }) => {
+  // États
+  const [isDetecting, setIsDetecting] = useState(false);
+  const [detections, setDetections] = useState([]);
+  const [abandonedObjects, setAbandonedObjects] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+  
+  // Références
+  const videoRef = useRef(null);
+  const canvasRef = useRef(null);
+  const streamRef = useRef(null);
+  const animationRef = useRef(null);
+  
+  // Effet de nettoyage
+  useEffect(() => {
+    return () => {
+      // Arrêter la détection et libérer les ressources
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(track => track.stop());
+      }
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+      }
+    };
+  }, []);
+  
+  // Gestion du succès de l'accès à la caméra
+  const handleStreamSuccess = useCallback((stream) => {
+    if (!videoRef.current) {
+      console.error('Référence vidéo non disponible');
+      setError('Erreur d\'initialisation de la caméra');
+      return;
+    }
+    
+    const video = videoRef.current;
+    
+    // Configurer la source vidéo
+    if ('srcObject' in video) {
+      video.srcObject = stream;
+    } else {
+      // Pour la compatibilité avec les anciens navigateurs
+      video.src = window.URL.createObjectURL(stream);
+    }
+    
+    streamRef.current = stream;
+    
+    // Attendre que les métadonnées soient chargées
+    const onLoadedMetadata = () => {
+      video.play()
+        .then(() => {
+          console.log('Lecture vidéo démarrée');
+          setIsDetecting(true);
+          processVideo();
+        })
+        .catch(err => {
+          console.error('Erreur de lecture vidéo:', err);
+          setError('Impossible de démarrer la lecture vidéo');
+          stopDetection();
+        });
+    };
+    
+    video.onloadedmetadata = onLoadedMetadata;
+    
+    // Gestion des erreurs
+    video.onerror = (err) => {
+      console.error('Erreur de lecture vidéo:', err);
+      setError('Erreur de lecture vidéo');
+      stopDetection();
+    };
+    
+    // Nettoyage
+    return () => {
+      video.onloadedmetadata = null;
+      video.onerror = null;
+    };
+  }, []);
+  
+  // Démarrer la détection
+  const startDetection = useCallback(async () => {
+    console.log('Démarrage de la détection...');
+    
+    try {
+      setIsLoading(true);
+      setError(null);
+      
+      if (isDetecting) {
+        console.log('La détection est déjà en cours');
+        return;
+      }
+      
+      if (!navigator.mediaDevices?.getUserMedia) {
+        throw new Error('Votre navigateur ne supporte pas l\'accès à la caméra');
+      }
+      
+      console.log('Tentative d\'accès à la caméra...');
+      
+      // Essayer d'abord la caméra arrière, puis l'avant
+      const constraints = {
+        video: { 
+          width: { ideal: 1280 },
+          height: { ideal: 720 },
+          facingMode: { exact: 'environment' }
+        }
+      };
+      
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia(constraints);
+        console.log('Accès à la caméra arrière réussi');
+        handleStreamSuccess(stream);
+      } catch (err) {
+        console.warn('Caméra arrière non disponible, essai avec la caméra avant...', err);
+        constraints.video.facingMode = { exact: 'user' };
+        const stream = await navigator.mediaDevices.getUserMedia(constraints);
+        console.log('Accès à la caméra avant réussi');
+        handleStreamSuccess(stream);
+      }
+    } catch (err) {
+      console.error('Erreur d\'accès à la caméra:', err);
+      setError(`Impossible d'accéder à la caméra: ${err.message}`);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [isDetecting, handleStreamSuccess]);
+  
+  // Arrêter la détection
+  const stopDetection = useCallback(() => {
+    console.log('Arrêt de la détection...');
+    
+    if (animationRef.current) {
+      cancelAnimationFrame(animationRef.current);
+      animationRef.current = null;
+    }
+    
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current = null;
+    }
+    
+    if (videoRef.current) {
+      videoRef.current.srcObject = null;
+    }
+    
+    setIsDetecting(false);
+    setDetections([]);
+    setAbandonedObjects([]);
+  }, []);
+  
+  // Traitement vidéo pour la détection
+  const processVideo = useCallback(() => {
+    if (!isDetecting || !videoRef.current || !canvasRef.current) {
+      return;
+    }
+    
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
+    
+    // Ajuster la taille du canvas à la vidéo
+    canvas.width = video.videoWidth || 640;
+    canvas.height = video.videoHeight || 480;
+    
+    // Dessiner la vidéo sur le canvas
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    
+    // Si la détection est activée, traiter l'image
+    if (isDetecting) {
+      // Ici, vous pouvez ajouter le code pour détecter les objets
+      // et les dessiner sur le canvas
+      
+      // Exemple de dessin d'un rectangle de test
+      ctx.strokeStyle = '#00FF00';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(50, 50, 100, 100);
+      
+      // Planifier la prochaine frame
+      animationRef.current = requestAnimationFrame(processVideo);
+    }
+  }, [isDetecting]);
+  
+  // Rendu du composant
+  return (
+    <div style={{ width: '100%', maxWidth: '800px', margin: '0 auto', padding: '20px' }}>
+      {/* En-tête */}
+      <div style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: '20px',
+        padding: '0 10px'
+      }}>
+        <div>
+          <Typography.Title level={4} style={{ margin: 0, fontSize: '1.2rem' }}>
+            {cameraName || 'Détection en temps réel'}
+          </Typography.Title>
+          <Typography.Text type="secondary" style={{ fontSize: '0.9rem' }}>
+            {isDetecting ? 'Analyse en cours...' : 'Prêt à détecter'}
+          </Typography.Text>
+        </div>
+        
+        {!isDetecting ? (
+          <Button 
+            type="primary"
+            icon={<CameraOutlined />}
+            onClick={startDetection}
+            loading={isLoading}
+            size="middle"
+            style={{
+              backgroundColor: '#1890ff',
+              borderColor: '#1890ff',
+              boxShadow: '0 2px 0 rgba(5, 145, 255, 0.1)'
+            }}
+          >
+            Démarrer la détection
+          </Button>
+        ) : (
+          <Button 
+            danger 
+            icon={<StopOutlined />}
+            onClick={stopDetection}
+            size="middle"
+          >
+            Arrêter
+          </Button>
+        )}
+      </div>
+      
+      {/* Zone de la caméra */}
+      <div style={{
+        position: 'relative',
+        width: '100%',
+        borderRadius: '8px',
+        overflow: 'hidden',
+        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+        backgroundColor: '#f0f0f0',
+        aspectRatio: '16/9'
+      }}>
+        {isLoading ? (
+          <div style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            alignItems: 'center',
+            backgroundColor: 'rgba(255, 255, 255, 0.8)',
+            zIndex: 10
+          }}>
+            <Spin size="large" />
+            <div style={{ marginTop: '16px', color: '#666' }}>
+              {isDetecting ? 'Traitement en cours...' : 'Initialisation...'}
+            </div>
+          </div>
+        ) : error ? (
+          <div style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            alignItems: 'center',
+            padding: '20px',
+            textAlign: 'center',
+            backgroundColor: '#fff',
+            zIndex: 10
+          }}>
+            <Alert
+              message="Erreur"
+              description={
+                <div style={{ margin: '10px 0' }}>
+                  <div>{error}</div>
+                  <Button 
+                    type="primary" 
+                    onClick={startDetection}
+                    style={{ marginTop: '15px' }}
+                  >
+                    Réessayer
+                  </Button>
+                </div>
+              }
+              type="error"
+              showIcon
+            />
+          </div>
+        ) : (
+          <>
+            {/* Élément vidéo */}
+            <video
+              ref={videoRef}
+              autoPlay
+              playsInline
+              muted
+              style={{
+                display: isDetecting ? 'block' : 'none',
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover'
+              }}
+            />
+            
+            {/* Canvas pour les superpositions */}
+            <canvas
+              ref={canvasRef}
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: '100%',
+                display: isDetecting ? 'block' : 'none',
+                pointerEvents: 'none'
+              }}
+            />
+            
+            {/* État initial - Invite de démarrage */}
+            {!isDetecting && !isLoading && !error && (
+              <div style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'center',
+                alignItems: 'center',
+                backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                padding: '20px',
+                textAlign: 'center'
+              }}>
+                <CameraOutlined style={{ 
+                  fontSize: '48px', 
+                  color: '#bfbfbf', 
+                  marginBottom: '16px' 
+                }} />
+                <p style={{ 
+                  color: '#666', 
+                  marginBottom: '20px',
+                  maxWidth: '400px'
+                }}>
+                  Cliquez sur "Démarrer la détection" pour activer l'analyse en temps réel
+                </p>
+                <Button 
+                  type="primary" 
+                  icon={<CameraOutlined />} 
+                  onClick={startDetection}
+                  loading={isLoading}
+                  size="large"
+                >
+                  Démarrer la détection
+                </Button>
+              </div>
+            )}
+          </>
+        )}
+      </div>
+      
+      {/* Section de débogage (uniquement en développement) */}
+      {process.env.NODE_ENV === 'development' && (
+        <div style={{ 
+          marginTop: '20px', 
+          padding: '15px', 
+          backgroundColor: '#f5f5f5', 
+          borderRadius: '4px',
+          fontSize: '0.85rem'
+        }}>
+          <h4>Informations de débogage :</h4>
+          <pre style={{ 
+            fontSize: '0.8rem',
+            whiteSpace: 'pre-wrap',
+            wordWrap: 'break-word'
+          }}>
+            {JSON.stringify({
+              isDetecting,
+              isLoading,
+              hasError: !!error,
+              videoReady: videoRef.current?.readyState,
+              videoDimensions: videoRef.current ? 
+                `${videoRef.current.videoWidth}x${videoRef.current.videoHeight}` : 'N/A',
+              streamActive: !!streamRef.current,
+              detectionCount: detections.length,
+              abandonedObjectsCount: abandonedObjects.length
+            }, null, 2)}
+          </pre>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default CameraAnomalyDetection;

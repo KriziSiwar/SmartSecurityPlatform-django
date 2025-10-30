@@ -385,13 +385,23 @@ def camera_create(request):
     if request.method == 'POST':
         form = CameraSurveillanceForm(request.POST)
         if form.is_valid():
-            camera = form.save()
-            messages.success(request, f'La caméra "{camera.nom}" a été créée !')
+            # La création du site est gérée dans la méthode save() du formulaire
+            camera = form.save(commit=True, request=request)
+            messages.success(request, f'La caméra "{camera.nom}" a été créée avec succès !')
             return redirect('camera_detail', pk=camera.pk)
+        else:
+            # Afficher les erreurs de validation
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f"{field}: {error}")
     else:
         form = CameraSurveillanceForm()
     
-    context = {'form': form, 'action': 'Créer', 'title': 'Nouvelle Caméra'}
+    context = {
+        'form': form, 
+        'action': 'Créer', 
+        'title': 'Nouvelle Caméra'
+    }
     return render(request, 'camera/camera_form.html', context)
 
 @login_required

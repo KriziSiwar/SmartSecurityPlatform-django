@@ -66,23 +66,38 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const login = async (username, password) => {
-    try {
-      const response = await axios.post('http://localhost:8000/api/auth/login/', {
-        username,
-        password,
-      });
+ // Dans la fonction login, modifiez la partie qui gère la réponse de connexion
+const login = async (username, password) => {
+  try {
+    const response = await axios.post('http://localhost:8000/api/auth/login/', {
+      username,
+      password,
+    });
 
-      const { access, refresh, user: userData } = response.data;
-      localStorage.setItem('access_token', access);
-      localStorage.setItem('refresh_token', refresh);
-      axios.defaults.headers.common['Authorization'] = `Bearer ${access}`;
-      setUser(userData);
-      return { success: true };
-    } catch (error) {
-      return { success: false, error: error.response?.data?.error || 'Login failed' };
-    }
-  };
+    const { access, refresh, user } = response.data;
+    
+    // Stockez les tokens
+    localStorage.setItem('access_token', access);
+    localStorage.setItem('refresh_token', refresh);
+    
+    // Stockez les informations de l'utilisateur
+    localStorage.setItem('user', JSON.stringify(user));
+    
+    // Configurez l'en-tête d'autorisation pour toutes les requêtes suivantes
+    axios.defaults.headers.common['Authorization'] = `Bearer ${access}`;
+    
+    // Mettez à jour l'état de l'utilisateur
+    setUser(user);
+    
+    return { success: true };
+  } catch (error) {
+    console.error('Login error:', error);
+    return { 
+      success: false, 
+      error: error.response?.data?.detail || 'Échec de la connexion' 
+    };
+  }
+};
 
   const register = async (userData) => {
     try {

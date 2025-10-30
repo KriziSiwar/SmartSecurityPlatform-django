@@ -1,0 +1,208 @@
+{% extends 'base.html' %}
+
+{% block title %}Détails de l'événement - {{ evenement.type_evenement }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-calendar-alt me-2"></i>Détails de l'événement
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h5 class="border-bottom pb-2">Informations générales</h5>
+                            <div class="mb-3">
+                                <span class="fw-bold">Type d'événement :</span>
+                                <span class="badge bg-info text-dark">{{ evenement.get_type_evenement_display }}</span>
+                            </div>
+                            <div class="mb-3">
+                                <span class="fw-bold">Niveau d'urgence :</span>
+                                <span class="badge {% if evenement.niveau_urgence == 'critique' %}bg-danger{% else %}bg-warning{% endif %}">
+                                    {{ evenement.get_niveau_urgence_display }}
+                                </span>
+                            </div>
+                            <div class="mb-3">
+                                <span class="fw-bold">Date et heure :</span>
+                                {{ evenement.date_creation|date:"d/m/Y H:i:s" }}
+                                <small class="text-muted">({{ evenement.date_creation|timesince }} ago)</small>
+                            </div>
+                            <div class="mb-3">
+                                <span class="fw-bold">Statut :</span>
+                                <span class="badge {% if evenement.statut == 'resolu' %}bg-success{% else %}bg-warning{% endif %}">
+                                    {{ evenement.get_statut_display }}
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <h5 class="border-bottom pb-2">Source</h5>
+                            {% if evenement.site %}
+                            <div class="mb-3">
+                                <span class="fw-bold">Site :</span>
+                                <a href="{% url 'site_detail' pk=evenement.site.pk %}">
+                                    {{ evenement.site.nom }}
+                                </a>
+                            </div>
+                            {% endif %}
+                            
+                            {% if evenement.camera %}
+                            <div class="mb-3">
+                                <span class="fw-bold">Caméra :</span>
+                                <a href="{% url 'camera_detail' pk=evenement.camera.pk %}">
+                                    {{ evenement.camera.nom }}
+                                </a>
+                            </div>
+                            {% endif %}
+                            
+                            {% if evenement.capteur %}
+                            <div class="mb-3">
+                                <span class="fw-bold">Capteur :</span>
+                                <a href="{% url 'capteur_detail' pk=evenement.capteur.pk %}">
+                                    {{ evenement.capteur.get_type_display }} - {{ evenement.capteur.emplacement }}
+                                </a>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <h5 class="border-bottom pb-2">Description</h5>
+                        <div class="p-3 bg-light rounded">
+                            {{ evenement.description|linebreaks }}
+                        </div>
+                    </div>
+                    
+                    {% if evenement.donnees_supplementaires %}
+                    <div class="mb-4">
+                        <h5 class="border-bottom pb-2">Données supplémentaires</h5>
+                        <div class="p-3 bg-light rounded">
+                            <pre class="mb-0">{{ evenement.donnees_supplementaires|pprint }}</pre>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="card-footer">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <a href="{% url 'evenement_list' %}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left me-1"></i> Retour à la liste
+                            </a>
+                            {% if evenement.statut != 'resolu' %}
+                            <a href="{% url 'evenement_resoudre' pk=evenement.pk %}" class="btn btn-success">
+                                <i class="fas fa-check me-1"></i> Marquer comme résolu
+                            </a>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <a href="{% url 'evenement_update' pk=evenement.pk %}" class="btn btn-primary">
+                                <i class="fas fa-edit me-1"></i> Modifier
+                            </a>
+                            <a href="{% url 'evenement_delete' pk=evenement.pk %}" class="btn btn-danger">
+                                <i class="fas fa-trash-alt me-1"></i> Supprimer
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <!-- Section pour les alertes associées -->
+            <div class="card mb-4">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-bell me-2"></i>Alertes associées
+                        <span class="badge bg-white text-dark ms-2">{{ nb_alertes }}</span>
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    {% if alertes %}
+                        <div class="list-group list-group-flush">
+                            {% for alerte in alertes %}
+                            <a href="{% url 'alerte_detail' pk=alerte.pk %}" class="list-group-item list-group-item-action">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h6 class="mb-1">{{ alerte.type_alerte }}</h6>
+                                    <small class="text-muted">{{ alerte.date_creation|timesince }}</small>
+                                </div>
+                                <p class="mb-1">{{ alerte.message|truncatechars:60 }}</p>
+                                <small>
+                                    <span class="badge {% if alerte.statut == 'envoyee' %}bg-warning{% else %}bg-success{% endif %}">
+                                        {{ alerte.get_statut_display }}
+                                    </span>
+                                </small>
+                            </a>
+                            {% endfor %}
+                        </div>
+                        <div class="p-3 text-center">
+                            <a href="{% url 'alerte_create' %}?evenement={{ evenement.pk }}" class="btn btn-sm btn-outline-info">
+                                <i class="fas fa-plus me-1"></i> Créer une alerte
+                            </a>
+                        </div>
+                    {% else %}
+                        <div class="p-4 text-center">
+                            <p class="text-muted mb-3">Aucune alerte associée à cet événement.</p>
+                            <a href="{% url 'alerte_create' %}?evenement={{ evenement.pk }}" class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-plus me-1"></i> Créer une alerte
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Section pour les actions rapides -->
+            <div class="card">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-bolt me-2"></i>Actions rapides
+                    </h5>
+                </div>
+                <div class="list-group list-group-flush">
+                    <a href="{% url 'rapport_create' %}?evenement={{ evenement.pk }}" class="list-group-item list-group-item-action">
+                        <i class="fas fa-file-alt text-primary me-2"></i> Créer un rapport
+                    </a>
+                    <a href="{% url 'maintenance_create' %}?evenement={{ evenement.pk }}" class="list-group-item list-group-item-action">
+                        <i class="fas fa-tools text-warning me-2"></i> Planifier une maintenance
+                    </a>
+                    <a href="#" class="list-group-item list-group-item-action" data-bs-toggle="modal" data-bs-target="#exportModal">
+                        <i class="fas fa-file-export text-success me-2"></i> Exporter les détails
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal d'export -->
+<div class="modal fade" id="exportModal" tabindex="-1" aria-labelledby="exportModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exportModalLabel">Exporter les détails</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Sélectionnez le format d'export :</p>
+                <div class="list-group">
+                    <a href="#" class="list-group-item list-group-item-action">
+                        <i class="far fa-file-pdf text-danger me-2"></i> Exporter en PDF
+                    </a>
+                    <a href="#" class="list-group-item list-group-item-action">
+                        <i class="far fa-file-excel text-success me-2"></i> Exporter en Excel
+                    </a>
+                    <a href="#" class="list-group-item list-group-item-action">
+                        <i class="far fa-file-word text-primary me-2"></i> Exporter en Word
+                    </a>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

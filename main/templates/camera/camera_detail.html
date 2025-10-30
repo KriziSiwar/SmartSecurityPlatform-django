@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+
+{% block title %}Détails de la caméra - {{ camera.nom }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Détails de la caméra</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-4 fw-bold">Nom :</div>
+                        <div class="col-md-8">{{ camera.nom }}</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-4 fw-bold">Adresse IP :</div>
+                        <div class="col-md-8">{{ camera.ip_address }}</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-4 fw-bold">Emplacement :</div>
+                        <div class="col-md-8">{{ camera.emplacement }}</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-4 fw-bold">État :</div>
+                        <div class="col-md-8">
+                            <span class="badge {% if camera.etat == 'en_ligne' %}bg-success{% else %}bg-danger{% endif %}">
+                                {{ camera.get_etat_display }}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-4 fw-bold">Type :</div>
+                        <div class="col-md-8">{{ camera.get_type_display }}</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-4 fw-bold">Site :</div>
+                        <div class="col-md-8">
+                            <a href="{% url 'site_detail' pk=camera.site.pk %}">
+                                {{ camera.site.nom }}
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <a href="{% url 'camera_update' pk=camera.pk %}" class="btn btn-primary">
+                        <i class="fas fa-edit"></i> Modifier
+                    </a>
+                    <a href="{% url 'camera_list' %}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Retour à la liste
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <!-- Section pour les événements récents -->
+            <div class="card mb-4">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">Événements récents</h5>
+                </div>
+                <div class="card-body">
+                    {% if evenements %}
+                        <div class="list-group">
+                            {% for evenement in evenements %}
+                                <a href="{% url 'evenement_detail' pk=evenement.pk %}" 
+                                   class="list-group-item list-group-item-action">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h6 class="mb-1">{{ evenement.type_evenement }}</h6>
+                                        <small>{{ evenement.date_creation|timesince }}</small>
+                                    </div>
+                                    <p class="mb-1">{{ evenement.description|truncatechars:50 }}</p>
+                                    <small>
+                                        <span class="badge {% if evenement.niveau_urgence == 'critique' %}bg-danger{% else %}bg-warning{% endif %}">
+                                            {{ evenement.get_niveau_urgence_display }}
+                                        </span>
+                                    </small>
+                                </a>
+                            {% endfor %}
+                        </div>
+                        <div class="mt-3 text-center">
+                            <a href="{% url 'evenement_list' %}?camera={{ camera.id }}" class="btn btn-sm btn-outline-info">
+                                Voir tous les événements ({{ nb_evenements }})
+                            </a>
+                        </div>
+                    {% else %}
+                        <p class="text-muted text-center mb-0">Aucun événement récent</p>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Section pour les statistiques rapides -->
+            <div class="card">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0">Statistiques</h5>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-3">
+                        <div class="display-4">{{ nb_evenements }}</div>
+                        <div class="text-muted">Événements enregistrés</div>
+                    </div>
+                    <div class="d-grid">
+                        <a href="{% url 'rapport_create' %}?camera={{ camera.id }}" 
+                           class="btn btn-outline-primary">
+                            <i class="fas fa-file-alt"></i> Générer un rapport
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- La fonctionnalité de mise à jour en temps réel de l'état de la caméra sera ajoutée ultérieurement -->
+{% endblock %}

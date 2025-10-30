@@ -31,6 +31,7 @@ import {
   Build as BuildIcon,
   Logout as LogoutIcon,
   AccountCircle as AccountCircleIcon,
+  Security as SecurityIcon,
 } from '@mui/icons-material';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -63,6 +64,7 @@ const Layout = () => {
   const getMenuItems = () => {
     const baseItems = [
       { text: 'Dashboard', icon: <DashboardIcon />, path: '/' },
+      { text: 'Détection Anomalies', icon: <SecurityIcon />, path: '/anomaly-detection' },
     ];
 
     if (user?.role === 'admin') {
@@ -75,7 +77,7 @@ const Layout = () => {
         { text: 'Événements', icon: <EventIcon />, path: '/events' },
         { text: 'Rapports', icon: <AssessmentIcon />, path: '/reports' },
         { text: 'Maintenances', icon: <BuildIcon />, path: '/maintenances' },
-        { text: 'Test IA', icon: <AssessmentIcon />, path: '/ai-test' },
+        { text: 'Détection Anomalies', icon: <SecurityIcon />, path: '/anomaly-detection' },
       ];
     } else if (user?.role === 'technicien') {
       return [
