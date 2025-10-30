@@ -17,7 +17,7 @@ import {
   Build as BuildIcon,
   Sensors as SensorsIcon,
 } from '@mui/icons-material';
-import axios from 'axios';
+import api from '../../utils/axiosConfig';
 
 const Dashboard = () => {
   const [stats, setStats] = useState(null);
@@ -29,7 +29,7 @@ const Dashboard = () => {
 
   const fetchStats = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/api/dashboard/stats/');
+      const response = await api.get('/api/dashboard/stats/');
       setStats(response.data);
     } catch (error) {
       console.error('Error fetching dashboard stats:', error);
