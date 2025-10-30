@@ -45,7 +45,7 @@ import {
   Phone as PhoneIcon,
 } from '@mui/icons-material';
 import { keyframes } from '@emotion/react';
-import axios from 'axios';
+import api from '../../utils/axiosConfig';
 
 // Animation pour le chargement
 const pulse = keyframes`
@@ -83,7 +83,7 @@ const SitesList = () => {
       if (filters.search) params.append('search', filters.search);
       if (filters.statut) params.append('statut', filters.statut);
 
-      const response = await axios.get(`http://localhost:8000/api/sites/?${params}`);
+      const response = await api.get(`/api/sites/?${params}`);
       const data = response.data.results || response.data;
       setSites(Array.isArray(data) ? data : []);
     } catch (error) {
@@ -105,7 +105,7 @@ const SitesList = () => {
   const handleDelete = async (id) => {
     if (window.confirm('Êtes-vous sûr de vouloir supprimer ce site ?')) {
       try {
-        await axios.delete(`http://localhost:8000/api/sites/${id}/`);
+        await api.delete(`/api/sites/${id}/`);
         fetchSites();
       } catch (error) {
         console.error('Error deleting site:', error);
