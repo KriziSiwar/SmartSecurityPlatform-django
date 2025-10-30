@@ -32,6 +32,21 @@ const TechnicienDashboard = () => {
   useEffect(() => {
     fetchStats();
   }, []);
+// Load Chatbase widget
+useEffect(() => {
+  const script = document.createElement('script');
+  script.src = 'https://www.chatbase.co/embed.min.js';
+  script.id = 'chatbase-script';
+  script.setAttribute('chatbotId', 'JeBVWbqcmjcpZE8zm8MaX');
+  script.setAttribute('domain', 'www.chatbase.co');
+  script.async = true;
+  document.head.appendChild(script);
+
+  return () => {
+    // Clean up on unmount
+    document.head.removeChild(script);
+  };
+}, []);
 
   const fetchStats = async () => {
     try {
@@ -197,6 +212,25 @@ const TechnicienDashboard = () => {
           </Paper>
         </Grid>
       </Grid>
+      <Grid container spacing={3} sx={{ mt: 2 }}>
+  <Grid item xs={12}>
+    <Paper sx={{ p: 2 }}>
+      <Typography variant="h6" gutterBottom>
+        Chatbot
+      </Typography>
+      <Box sx={{ width: '100%', height: '700px' }}>
+        <iframe
+          src="https://www.chatbase.co/chatbot-iframe/JeBVWbqcmjcpZE8zm8MaX"
+          width="100%"
+          height="100%"
+          style={{ border: 'none' }}
+          title="Chatbot"
+        />
+      </Box>
+    </Paper>
+  </Grid>
+</Grid>
+
     </Container>
   );
 };

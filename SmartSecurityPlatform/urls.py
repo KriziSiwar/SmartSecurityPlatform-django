@@ -17,9 +17,8 @@ urlpatterns = [
     # Admin Django
     path('admin/', admin.site.urls),
 
-    # ========== ENDPOINTS IA ==========
+    # ========== ENDPOINTS IA (AJOUTEZ CETTE LIGNE) ==========
     path('api/classify-alert/', api_views.classify_message_view, name='api_classify_alert_new'),
-    path('api/detect-anomalies/', api_views.detect_anomalies, name='api_detect_anomalies'),
 
     # ========== AUTHENTICATION ENDPOINTS ==========
     path('api/auth/login/', api_views.login_view, name='api_login'),

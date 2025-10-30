@@ -9,11 +9,6 @@ from django.db.models import Q, Count
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 import json
-import base64
-import numpy as np
-import cv2
-from django.core.files.base import ContentFile
-from .anomaly_detection import anomaly_detector
 
 from .models import (
     SiteClient, Alerte, Evenement, CustomUser, CameraSurveillance,
@@ -596,57 +591,3 @@ def classify_and_create_alert(request):
 
 # Alias pour la compatibilité
 classify_alert_pure = classify_message_view
-
-# ========== DÉTECTION D'ANOMALIES ==========
-
-@api_view(['POST'])
-@permission_classes([IsAuthenticated])
-def detect_anomalies(request):
-    """
-    Endpoint pour détecter des anomalies dans une image de caméra
-    Accepte une image en base64 ou un fichier image
-    """
-    try:
-        # Vérifier si l'image est envoyée en base64
-        if 'image' in request.data:
-            # Décoder l'image base64
-            image_data = request.data['image']
-            if 'base64,' in image_data:
-                format, imgstr = image_data.split(';base64,') 
-                ext = format.split('/')[-1]
-                image_data = base64.b64decode(imgstr)
-            else:
-                image_data = base64.b64decode(image_data)
-                
-            # Convertir en numpy array
-            nparr = np.frombuffer(image_data, np.uint8)
-            frame = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-        
-        # Vérifier si un fichier image est envoyé
-        elif 'file' in request.FILES:
-            file = request.FILES['file']
-            file_data = file.read()
-            nparr = np.frombuffer(file_data, np.uint8)
-            frame = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-        
-        else:
-            return Response(
-                {'error': 'Aucune image fournie. Envoyez une image en base64 ou un fichier image.'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        
-        # Détecter les anomalies
-        results = anomaly_detector.detect_suspicious_activity(frame)
-        
-        return Response({
-            'status': 'success',
-            'detections': results['objects'],
-            'abandoned_objects': results['abandoned_objects'],
-            'suspicious_activities': results['suspicious_activities']
-        })
-        
-    except Exception as e:
-        return Response(
-            {'error': f'Erreur lors du traitement de l\'image: {str(e)}'},
-            status=status.HTTP_500_INTERNAL_SERVER_ERROR
-        )

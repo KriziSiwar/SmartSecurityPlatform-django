@@ -104,21 +104,6 @@ class CameraSurveillanceForm(forms.ModelForm):
             'etat': forms.Select(attrs={'class': 'form-control'}),
             'type': forms.Select(attrs={'class': 'form-control'}),
         }
-    
-    def save(self, commit=True, request=None):
-        # Save the camera instance
-        camera = super().save(commit=commit)
-        
-        # If you need to do something with the request, you can do it here
-        # For example, you might want to log who created the camera
-        if request and hasattr(request, 'user') and request.user.is_authenticated:
-            # Example: Log the action or set created_by field if it exists
-            if hasattr(camera, 'created_by'):
-                camera.created_by = request.user
-                if commit:
-                    camera.save()
-        
-        return camera
 
 
 class CameraFilterForm(forms.Form):
