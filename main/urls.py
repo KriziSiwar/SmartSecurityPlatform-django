@@ -1,4 +1,6 @@
 from django.urls import path
+from . import views
+from django.urls import path, include
 from .views import (
     register_view, login_view, logout_view, dashboard_view,
     # SiteClient views
@@ -85,4 +87,7 @@ urlpatterns = [
 
     # ========== API IA Classification ==========
     path('api/alertes/train-classifier/', train_classifier, name='train_classifier'),
+    path('api/', include('main.api_urls')),
+    path('rapports/nouveau/', views.rapport_create, name='rapport_create'),
+    path('api/predict-all-maintenance/', views.predict_all_maintenance, name='predict_all_maintenance'),
 ]

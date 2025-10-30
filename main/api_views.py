@@ -7,6 +7,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate
 from django.db.models import Q, Count
 from django.views.decorators.csrf import csrf_exempt
+from .ml_predictor import train_model
 from django.http import JsonResponse
 import json
 
@@ -589,5 +590,67 @@ def classify_and_create_alert(request):
         return JsonResponse({'error': f'Erreur: {str(e)}'}, status=500)
 
 
+
+
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def train_model_view(request):
+    """Réentraîne le modèle IA de maintenance"""
+    result = train_model()
+    return Response({'status': 'success', 'message': result})
+
+
+
+
+
+
 # Alias pour la compatibilité
 classify_alert_pure = classify_message_view
+
+
+
+
+   
+# === 🧠 IA : Prédiction et entraînement ===
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+
+
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def predict_next_maintenance_view(request):
+    """Vue API : prédire la prochaine maintenance"""
+    data = request.data
+    result = predict_next_maintenance({
+        "type_maintenance": data.get("type_maintenance", "preventive"),
+        "equipement": data.get("equipement", "inconnu"),
+        "site_nom": data.get("site_nom", "inconnu"),
+        "duree_estimee": float(data.get("duree_estimee", 1)),
+        "priorite": data.get("priorite", "moyenne"),
+        "statut": data.get("statut", "planifiee"),
+        "cout_estime": float(data.get("cout_estime", 0)),
+    })
+    return Response(result)
+
+
+
+
+
+# === 🧠 IA : Prédiction et entraînement (SANA) ===
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from .ml_predictor import predict_next_maintenance
+
+@api_view(['POST'])
+@permission_classes([])  # tu peux ajouter IsAuthenticated si tu veux sécuriser
+def predict_all_maintenances_view(request):
+    """Vue API : prédire la prochaine maintenance pour chaque équipement"""
+    data = request.data  # on récupère les équipements envoyés du front
+    results = predict_next_maintenance(data)
+    return Response(results)
