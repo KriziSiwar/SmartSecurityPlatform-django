@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }} - Smart Security</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .form-container {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            padding: 30px;
+        }
+        .form-label {
+            font-weight: 600;
+            color: #495057;
+        }
+        .required::after {
+            content: " *";
+            color: red;
+        }
+        .form-icon {
+            color: #007bff;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{% url 'dashboard' %}">
+                <i class="fas fa-shield-alt"></i> Smart Security
+            </a>
+            <div class="collapse navbar-collapse">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item"><a class="nav-link" href="{% url 'dashboard' %}"><i class="fas fa-home"></i> Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'camera_list' %}"><i class="fas fa-video"></i> Caméras</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="#"><i class="fas fa-edit"></i> {{ action }}</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-5">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Accueil</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'camera_list' %}">Caméras</a></li>
+                <li class="breadcrumb-item active">{{ action }}</li>
+            </ol>
+        </nav>
+
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="form-container">
+                    <h2 class="text-center mb-4">
+                        <i class="fas fa-video text-primary"></i> {{ title }}
+                    </h2>
+
+                    {% if form.errors %}
+                    <div class="alert alert-danger">
+                        <strong>Erreurs dans le formulaire :</strong>
+                        <ul class="mb-0">
+                            {% for field in form %}
+                                {% for error in field.errors %}
+                                    <li>{{ field.label }}: {{ error }}</li>
+                                {% endfor %}
+                            {% endfor %}
+                            {% for error in form.non_field_errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+                        
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <label for="{{ form.site.id_for_label }}" class="form-label required">
+                                    <i class="fas fa-building form-icon"></i>{{ form.site.label }}
+                                </label>
+                                {{ form.site }}
+                                <div class="form-text">Site où la caméra est installée</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="{{ form.nom.id_for_label }}" class="form-label required">
+                                    <i class="fas fa-tag form-icon"></i>{{ form.nom.label }}
+                                </label>
+                                {{ form.nom }}
+                                <div class="form-text">Nom d'identification de la caméra</div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <label for="{{ form.ip_address.id_for_label }}" class="form-label required">
+                                    <i class="fas fa-network-wired form-icon"></i>{{ form.ip_address.label }}
+                                </label>
+                                {{ form.ip_address }}
+                                <div class="form-text">Adresse IP de la caméra</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="{{ form.emplacement.id_for_label }}" class="form-label required">
+                                    <i class="fas fa-map-marker-alt form-icon"></i>{{ form.emplacement.label }}
+                                </label>
+                                {{ form.emplacement }}
+                                <div class="form-text">Localisation précise</div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <label for="{{ form.etat.id_for_label }}" class="form-label required">
+                                    <i class="fas fa-power-off form-icon"></i>{{ form.etat.label }}
+                                </label>
+                                {{ form.etat }}
+                                <div class="form-text">Statut actuel de la caméra</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="{{ form.type.id_for_label }}" class="form-label required">
+                                    <i class="fas fa-camera form-icon"></i>{{ form.type.label }}
+                                </label>
+                                {{ form.type }}
+                                <div class="form-text">Type de caméra</div>
+                            </div>
+                        </div>
+
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i>
+                            <strong>Information :</strong> La date de dernière connexion sera mise à jour automatiquement.
+                        </div>
+
+                        <hr class="my-4">
+
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'camera_list' %}" class="btn btn-secondary btn-lg">
+                                <i class="fas fa-arrow-left"></i> Annuler
+                            </a>
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-save"></i> {{ action }}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

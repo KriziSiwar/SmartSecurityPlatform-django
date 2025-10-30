@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }} - Smart Security</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .form-container { background: white; border-radius: 10px; box-shadow: 0 0 20px rgba(0,0,0,0.1); padding: 30px; }
+        .form-label { font-weight: 600; color: #495057; }
+        .required::after { content: " *"; color: red; }
+    </style>
+</head>
+<body class="bg-light">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{% url 'dashboard' %}">
+                <i class="fas fa-shield-alt"></i> Smart Security
+            </a>
+            <div class="collapse navbar-collapse">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item"><a class="nav-link" href="{% url 'dashboard' %}"><i class="fas fa-home"></i> Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'site_list' %}"><i class="fas fa-building"></i> Sites</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="{% url 'alerte_list' %}"><i class="fas fa-bell"></i> Alertes</a></li>
+                </ul>
+                <ul class="navbar-nav">
+                    <li class="nav-item"><a class="nav-link" href="{% url 'logout' %}"><i class="fas fa-sign-out-alt"></i> Déconnexion</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-5">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Accueil</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'alerte_list' %}">Alertes</a></li>
+                <li class="breadcrumb-item active">{{ action }}</li>
+            </ol>
+        </nav>
+
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="form-container">
+                    <h2 class="text-center mb-4">
+                        <i class="fas fa-bell text-danger"></i> {{ title }}
+                    </h2>
+
+                    {% if form.errors %}
+                        <div class="alert alert-danger">
+                            <strong>Erreurs dans le formulaire :</strong>
+                            <ul class="mb-0">
+                                {% for field in form %}
+                                    {% for error in field.errors %}
+                                        <li>{{ field.label }}: {{ error }}</li>
+                                    {% endfor %}
+                                {% endfor %}
+                                {% for error in form.non_field_errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    {% endif %}
+
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+                        
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <label for="{{ form.evenement.id_for_label }}" class="form-label required">{{ form.evenement.label }}</label>
+                                {{ form.evenement }}
+                                <small class="form-text text-muted">
+                                    <i class="fas fa-info-circle"></i> Sélectionnez l'événement qui a déclenché cette alerte
+                                </small>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <label for="{{ form.message.id_for_label }}" class="form-label required">{{ form.message.label }}</label>
+                                {{ form.message }}
+                                <small class="form-text text-muted">
+                                    <i class="fas fa-info-circle"></i> Décrivez l'alerte de manière claire et précise
+                                </small>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.niveau.id_for_label }}" class="form-label required">{{ form.niveau.label }}</label>
+                                {{ form.niveau }}
+                                <small class="form-text text-muted">
+                                    <i class="fas fa-exclamation-triangle text-warning"></i> Choisissez le niveau d'importance
+                                </small>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.statut.id_for_label }}" class="form-label required">{{ form.statut.label }}</label>
+                                {{ form.statut }}
+                                <small class="form-text text-muted">
+                                    <i class="fas fa-flag text-info"></i> Statut actuel de l'alerte
+                                </small>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <label for="{{ form.destinataire.id_for_label }}" class="form-label required">{{ form.destinataire.label }}</label>
+                                {{ form.destinataire }}
+                                <small class="form-text text-muted">
+                                    <i class="fas fa-user text-success"></i> Utilisateur qui recevra cette alerte
+                                </small>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <div class="alert alert-info">
+                            <i class="fas fa-lightbulb"></i> <strong>Astuce :</strong> Les alertes critiques sont prioritaires et nécessitent une attention immédiate.
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'alerte_list' %}" class="btn btn-secondary btn-lg">
+                                <i class="fas fa-arrow-left"></i> Annuler
+                            </a>
+                            <button type="submit" class="btn btn-danger btn-lg">
+                                <i class="fas fa-save"></i> {{ action }}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

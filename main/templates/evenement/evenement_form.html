@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }} - Smart Security</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .form-container {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            padding: 30px;
+        }
+        .urgency-critical { border-left: 4px solid #dc3545; background-color: #fff5f5; padding: 15px; }
+        .urgency-high { border-left: 4px solid #fd7e14; background-color: #fff4e6; padding: 15px; }
+        .urgency-medium { border-left: 4px solid #ffc107; background-color: #fffbf0; padding: 15px; }
+        .urgency-low { border-left: 4px solid #28a745; background-color: #f0fff4; padding: 15px; }
+    </style>
+</head>
+<body class="bg-light">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{% url 'dashboard' %}">
+                <i class="fas fa-shield-alt"></i> Smart Security
+            </a>
+        </div>
+    </nav>
+
+    <div class="container mt-5">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Accueil</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'evenement_list' %}">Événements</a></li>
+                <li class="breadcrumb-item active">{{ action }}</li>
+            </ol>
+        </nav>
+
+        <div class="row justify-content-center">
+            <div class="col-md-10">
+                <div class="form-container">
+                    <h2 class="text-center mb-4">
+                        <i class="fas fa-exclamation-triangle text-warning"></i> {{ title }}
+                    </h2>
+
+                    {% if form.errors %}
+                    <div class="alert alert-danger">
+                        <strong>Erreurs dans le formulaire :</strong>
+                        <ul class="mb-0">
+                            {% for field in form %}
+                                {% for error in field.errors %}
+                                    <li>{{ field.label }}: {{ error }}</li>
+                                {% endfor %}
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+                        
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label required">
+                                    <i class="fas fa-building text-primary"></i> {{ form.site.label }}
+                                </label>
+                                {{ form.site }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label required">
+                                    <i class="fas fa-tag text-info"></i> {{ form.type_evenement.label }}
+                                </label>
+                                {{ form.type_evenement }}
+                            </div>
+                        </div>
+
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label">
+                                    <i class="fas fa-video text-success"></i> {{ form.camera.label }}
+                                </label>
+                                {{ form.camera }}
+                                <div class="form-text">Caméra associée (optionnel)</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">
+                                    <i class="fas fa-broadcast-tower text-warning"></i> {{ form.capteur.label }}
+                                </label>
+                                {{ form.capteur }}
+                                <div class="form-text">Capteur associé (optionnel)</div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label required">
+                                    <i class="fas fa-exclamation-circle text-danger"></i> {{ form.niveau_urgence.label }}
+                                </label>
+                                {{ form.niveau_urgence }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label required">
+                                    <i class="fas fa-flag text-secondary"></i> {{ form.statut.label }}
+                                </label>
+                                {{ form.statut }}
+                            </div>
+                        </div>
+
+                        <!-- Aperçu urgence -->
+                        <div class="mb-4" id="urgencyPreview">
+                            <div class="urgency-medium">
+                                <h6><i class="fas fa-info-circle"></i> Niveau d'urgence sélectionné</h6>
+                                <p class="mb-0" id="urgencyText">Moyen - Surveillance normale</p>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label required">
+                                <i class="fas fa-align-left text-info"></i> {{ form.description.label }}
+                            </label>
+                            {{ form.description }}
+                            <div class="form-text">Décrivez l'événement en détail</div>
+                        </div>
+
+                        <div class="alert alert-info">
+                            <i class="fas fa-lightbulb"></i>
+                            <strong>Conseil :</strong> Pour les événements critiques, une alerte sera automatiquement générée.
+                        </div>
+
+                        <hr class="my-4">
+
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'evenement_list' %}" class="btn btn-secondary btn-lg">
+                                <i class="fas fa-arrow-left"></i> Annuler
+                            </a>
+                            <button type="submit" class="btn btn-warning btn-lg">
+                                <i class="fas fa-save"></i> {{ action }}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const niveauUrgence = document.getElementById('{{ form.niveau_urgence.id_for_label }}');
+            const preview = document.getElementById('urgencyPreview');
+            const urgencyText = document.getElementById('urgencyText');
+            
+            const urgencyMessages = {
+                'critique': 'Critique - Intervention immédiate requise!',
+                'eleve': 'Élevé - Attention particulière nécessaire',
+                'moyen': 'Moyen - Surveillance normale',
+                'faible': 'Faible - Routine de surveillance'
+            };
+            
+            function updateUrgencyPreview() {
+                const level = niveauUrgence.value;
+                const message = urgencyMessages[level] || 'Niveau non défini';
+                
+                urgencyText.textContent = message;
+                
+                // Mettre à jour les classes CSS
+                preview.innerHTML = `
+                    <div class="urgency-${level}">
+                        <h6><i class="fas fa-info-circle"></i> Niveau d'urgence sélectionné</h6>
+                        <p class="mb-0">${message}</p>
+                    </div>
+                `;
+            }
+            
+            niveauUrgence.addEventListener('change', updateUrgencyPreview);
+            updateUrgencyPreview(); // Initialisation
+        });
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
