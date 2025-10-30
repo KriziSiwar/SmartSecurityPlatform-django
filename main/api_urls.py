@@ -21,4 +21,7 @@ urlpatterns = [
    path('auth/techniciens/', api_views.techniciens_list, name='api_techniciens'),
    path('dashboard/stats/', api_views.dashboard_stats, name='api_dashboard_stats'),
    path('alertes/train-classifier/', api_views.train_classifier, name='train_classifier'),
+   path('ai/predict-next-maintenance/', api_views.predict_next_maintenance_view, name='predict_next_maintenance'),
+   path('ai/train-model/', api_views.train_model_view, name='train_model'),
+
 ]

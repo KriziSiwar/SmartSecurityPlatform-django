@@ -591,3 +591,90 @@ def classify_and_create_alert(request):
 
 # Alias pour la compatibilité
 classify_alert_pure = classify_message_view
+
+
+# === 🧠 IA : Prédiction et entraînement ===
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def predict_next_maintenance_view(request):
+    """Vue API : prédire la prochaine maintenance"""
+    data = request.data
+    result = predict_next_maintenance({
+        "type_maintenance": data.get("type_maintenance", "preventive"),
+        "equipement": data.get("equipement", "inconnu"),
+        "site_nom": data.get("site_nom", "inconnu"),
+        "duree_estimee": float(data.get("duree_estimee", 1)),
+        "priorite": data.get("priorite", "moyenne"),
+        "statut": data.get("statut", "planifiee"),
+        "cout_estime": float(data.get("cout_estime", 0)),
+    })
+    return Response(result)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def train_model_view(request):
+    """Vue API : réentraîner le modèle IA"""
+    model, message = train_model()
+    return Response({"message": message})
+# === 🧠 IA : Prédiction et entraînement ===
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from .ml_predictor import predict_next_maintenance, train_model
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def predict_next_maintenance_view(request):
+    """Vue API : prédire la prochaine maintenance"""
+    data = request.data
+    result = predict_next_maintenance({
+        "type_maintenance": data.get("type_maintenance", "preventive"),
+        "equipement": data.get("equipement", "inconnu"),
+        "site_nom": data.get("site_nom", "inconnu"),
+        "duree_estimee": float(data.get("duree_estimee", 1)),
+        "priorite": data.get("priorite", "moyenne"),
+        "statut": data.get("statut", "planifiee"),
+        "cout_estime": float(data.get("cout_estime", 0)),
+    })
+    return Response(result)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def train_model_view(request):
+    """Vue API : réentraîner le modèle IA"""
+    model, message = train_model()
+    return Response({"message": message})
+
+
+
+
+# === 🧠 IA : Prédiction et entraînement (SANA) ===
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from .ml_predictor import predict_next_maintenance, train_model
+
+@api_view(['POST'])
+@permission_classes([])
+def predict_next_maintenance_view(request):
+    """Vue API : prédire la prochaine maintenance"""
+    data = request.data
+    result = predict_next_maintenance({
+        "type_maintenance": data.get("type_maintenance", "preventive"),
+        "equipement": data.get("equipement", "inconnu"),
+        "site_nom": data.get("site_nom", "inconnu"),
+        "duree_estimee": float(data.get("duree_estimee", 1)),
+        "priorite": data.get("priorite", "moyenne"),
+        "statut": data.get("statut", "planifiee"),
+        "cout_estime": float(data.get("cout_estime", 0)),
+    })
+    return Response(result)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def train_model_view(request):
+    """Vue API : réentraîner le modèle IA"""
+    model, message = train_model()
+    return Response({"message": message})

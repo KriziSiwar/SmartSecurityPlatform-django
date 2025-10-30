@@ -788,3 +788,11 @@ def maintenance_delete(request, pk):
     
     context = {'maintenance': maintenance}
     return render(request, 'maintenance/maintenance_confirm_delete.html', context)
+
+
+
+
+
+
+
+

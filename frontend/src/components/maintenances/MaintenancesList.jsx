@@ -109,6 +109,60 @@ const MaintenancesList = () => {
     }
   };
 
+
+    // 🧠 Fonction IA : prédire prochaine maintenance
+const handlePredictAI = async () => {
+  try {
+    const payload = {
+      type_maintenance: 'preventive',
+      equipement: maintenances[0]?.equipement || 'inconnu',
+      site_nom: maintenances[0]?.site_nom || 'inconnu',
+      duree_estimee: maintenances[0]?.duree_estimee || 1,
+      priorite: maintenances[0]?.priorite || 'moyenne',
+      statut: maintenances[0]?.statut || 'planifiee',
+      cout_estime: maintenances[0]?.cout_estime || 0,
+    };
+
+    const res = await axios.post(
+      'http://localhost:8000/api/ai/predict-next-maintenance/',
+      payload,
+      {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+
+    const { predicted_days, recommended_date } = res.data;
+    alert(`🧠 IA : prochaine maintenance estimée dans ${predicted_days} jours (${recommended_date}).`);
+  } catch (error) {
+    console.error('Erreur IA :', error);
+    if (error.response && error.response.status === 401) {
+      alert('🔒 Token expiré ou non valide. Reconnecte-toi.');
+    } else {
+      alert('❌ Erreur IA : vérifie que ton serveur Django est lancé.');
+    }
+  }
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   if (loading) {
     return <Typography>Chargement...</Typography>;
   }
@@ -127,6 +181,21 @@ const MaintenancesList = () => {
           </Button>
         )}
       </Box>
+
+
+
+      {/* 🧠 Bouton IA : prédire prochaines maintenances */}
+{(userRole === 'admin' || userRole === 'technicien') && (
+  <Box display="flex" justifyContent="flex-end" mb={2}>
+    <Button
+      variant="outlined"
+      color="secondary"
+      onClick={handlePredictAI}
+    >
+      🧠 Prédire prochaines maintenances
+    </Button>
+  </Box>
+)}
 
       {/* Statistics Cards */}
       <Grid container spacing={3} mb={3}>

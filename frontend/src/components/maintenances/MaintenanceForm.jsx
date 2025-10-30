@@ -131,7 +131,8 @@ const MaintenanceForm = () => {
       <Paper sx={{ p: 3 }}>
         <form onSubmit={handleSubmit}>
           <Box display="flex" flexDirection="column" gap={3}>
-            <FormControl fullWidth required>
+           
+          <FormControl fullWidth required>
               <InputLabel>Type de maintenance</InputLabel>
               <Select
                 name="type_maintenance"
@@ -143,7 +144,8 @@ const MaintenanceForm = () => {
                 <MenuItem value="curative">Curative</MenuItem>
                 <MenuItem value="predictive">Prédictive</MenuItem>
               </Select>
-            </FormControl>
+            </FormControl>*/
+           
 
             <TextField
               label="Équipement"
