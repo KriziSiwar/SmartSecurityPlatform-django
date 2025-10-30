@@ -791,6 +791,22 @@ def maintenance_delete(request, pk):
 
 
 
+# --- Vue création rapport ---
+from .forms import RapportSurveillanceForm
+from .models import RapportSurveillance
+
+def rapport_create(request):
+    if request.method == 'POST':
+        form = RapportSurveillanceForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('rapport_list')
+    else:
+        form = RapportSurveillanceForm()
+    return render(request, 'rapport_form.html', {'form': form})
+
+
+
 
 
 

@@ -36,6 +36,7 @@ const MaintenancesList = () => {
   const [maintenances, setMaintenances] = useState([]);
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({});
+  const [predictions, setPredictions] = useState([]); // 🧠 nouvel état IA
   const [filters, setFilters] = useState({
     site: '',
     statut: '',
@@ -62,7 +63,6 @@ const MaintenancesList = () => {
       const maintenancesArray = Array.isArray(data) ? data : [];
       setMaintenances(maintenancesArray);
 
-      // Calculate stats
       const total = maintenancesArray.length;
       const planifiees = maintenancesArray.filter(m => m.statut === 'planifiee').length;
       const enCours = maintenancesArray.filter(m => m.statut === 'en_cours').length;
@@ -109,59 +109,23 @@ const MaintenancesList = () => {
     }
   };
 
+  // 🧠 Nouvelle fonction IA : prédire la prochaine maintenance pour CHAQUE équipement
+  const handlePredictAI = async () => {
+    try {
+      const res = await axios.get("http://127.0.0.1:8000/api/predict-all-maintenance/");
+      const predictionsData = res.data;
 
-    // 🧠 Fonction IA : prédire prochaine maintenance
-const handlePredictAI = async () => {
-  try {
-    const payload = {
-      type_maintenance: 'preventive',
-      equipement: maintenances[0]?.equipement || 'inconnu',
-      site_nom: maintenances[0]?.site_nom || 'inconnu',
-      duree_estimee: maintenances[0]?.duree_estimee || 1,
-      priorite: maintenances[0]?.priorite || 'moyenne',
-      statut: maintenances[0]?.statut || 'planifiee',
-      cout_estime: maintenances[0]?.cout_estime || 0,
-    };
-
-    const res = await axios.post(
-      'http://localhost:8000/api/ai/predict-next-maintenance/',
-      payload,
-      {
-        headers: {
-          'Content-Type': 'application/json',
-        },
+      if (Array.isArray(predictionsData) && predictionsData.length > 0) {
+        setPredictions(predictionsData);
+      } else {
+        setPredictions([]);
+        alert("Aucune donnée de prédiction disponible.");
       }
-    );
-
-    const { predicted_days, recommended_date } = res.data;
-    alert(`🧠 IA : prochaine maintenance estimée dans ${predicted_days} jours (${recommended_date}).`);
-  } catch (error) {
-    console.error('Erreur IA :', error);
-    if (error.response && error.response.status === 401) {
-      alert('🔒 Token expiré ou non valide. Reconnecte-toi.');
-    } else {
-      alert('❌ Erreur IA : vérifie que ton serveur Django est lancé.');
+    } catch (error) {
+      console.error("Erreur IA :", error);
+      alert("❌ Erreur IA : vérifie que ton serveur Django est bien lancé et la route existe.");
     }
-  }
-};
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  };
 
   if (loading) {
     return <Typography>Chargement...</Typography>;
@@ -182,22 +146,20 @@ const handlePredictAI = async () => {
         )}
       </Box>
 
-
-
       {/* 🧠 Bouton IA : prédire prochaines maintenances */}
-{(userRole === 'admin' || userRole === 'technicien') && (
-  <Box display="flex" justifyContent="flex-end" mb={2}>
-    <Button
-      variant="outlined"
-      color="secondary"
-      onClick={handlePredictAI}
-    >
-      🧠 Prédire prochaines maintenances
-    </Button>
-  </Box>
-)}
+      {(userRole === 'admin' || userRole === 'technicien') && (
+        <Box display="flex" justifyContent="flex-end" mb={2}>
+          <Button
+            variant="outlined"
+            color="secondary"
+            onClick={handlePredictAI}
+          >
+            🧠 Prédire prochaines maintenances
+          </Button>
+        </Box>
+      )}
 
-      {/* Statistics Cards */}
+      {/* Statistiques */}
       <Grid container spacing={3} mb={3}>
         <Grid item xs={12} sm={6} md={3}>
           <Card>
@@ -233,7 +195,7 @@ const handlePredictAI = async () => {
         </Grid>
       </Grid>
 
-      {/* Filters */}
+      {/* Filtres */}
       <Paper sx={{ p: 2, mb: 3 }}>
         <Box display="flex" gap={2} flexWrap="wrap">
           <FormControl size="small" sx={{ minWidth: 150 }}>
@@ -244,7 +206,6 @@ const handlePredictAI = async () => {
               onChange={(e) => handleFilterChange('site', e.target.value)}
             >
               <MenuItem value="">Tous</MenuItem>
-              {/* Add site options dynamically */}
             </Select>
           </FormControl>
           <FormControl size="small" sx={{ minWidth: 150 }}>
@@ -282,6 +243,7 @@ const handlePredictAI = async () => {
         </Box>
       </Paper>
 
+      {/* Tableau principal */}
       <TableContainer component={Paper}>
         <Table>
           <TableHead>
@@ -342,6 +304,37 @@ const handlePredictAI = async () => {
           </TableBody>
         </Table>
       </TableContainer>
+
+      {/* 🧠 Tableau des prédictions IA */}
+      {predictions.length > 0 && (
+        <Paper sx={{ p: 3, mt: 4 }}>
+          <Typography variant="h6" mb={2}>
+            🧠 Prédictions IA – Prochaines maintenances
+          </Typography>
+          <TableContainer>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>Équipement</TableCell>
+                  <TableCell>Site</TableCell>
+                  <TableCell>Jours restants</TableCell>
+                  <TableCell>Date recommandée</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {predictions.map((p, index) => (
+                  <TableRow key={index}>
+                    <TableCell>{p.equipement}</TableCell>
+                    <TableCell>{p.site}</TableCell>
+                    <TableCell>{p.predicted_days}</TableCell>
+                    <TableCell>{p.recommended_date}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Paper>
+      )}
 
       {maintenances.length === 0 && (
         <Paper sx={{ p: 3, mt: 2, textAlign: 'center' }}>
