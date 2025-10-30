@@ -113,6 +113,7 @@ const MaintenancesList = () => {
   const handlePredictAI = async () => {
     try {
       const res = await axios.get("http://127.0.0.1:8000/api/predict-all-maintenance/");
+
       const predictionsData = res.data;
 
       if (Array.isArray(predictionsData) && predictionsData.length > 0) {

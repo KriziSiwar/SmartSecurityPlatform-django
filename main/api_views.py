@@ -7,6 +7,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate
 from django.db.models import Q, Count
 from django.views.decorators.csrf import csrf_exempt
+from .ml_predictor import train_model
 from django.http import JsonResponse
 import json
 
@@ -589,30 +590,35 @@ def classify_and_create_alert(request):
         return JsonResponse({'error': f'Erreur: {str(e)}'}, status=500)
 
 
-# Alias pour la compatibilité
-classify_alert_pure = classify_message_view
 
 
-# === 🧠 IA : Prédiction et entraînement ===
 
-
-@api_view(['GET'])
-def predict_all_maintenances_view(request):
-    """Vue API : prédire la prochaine maintenance pour chaque équipement"""
-    results = predict_all_maintenances()
-    return Response(results)
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def train_model_view(request):
-    """Vue API : réentraîner le modèle IA"""
-    model, message = train_model()
-    return Response({"message": message})
+    """Réentraîne le modèle IA de maintenance"""
+    result = train_model()
+    return Response({'status': 'success', 'message': result})
+
+
+
+
+
+
+# Alias pour la compatibilité
+classify_alert_pure = classify_message_view
+
+
+
+
+   
 # === 🧠 IA : Prédiction et entraînement ===
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from .ml_predictor import predict_all_maintenances, train_model
+
+
 
 
 @api_view(['POST'])
@@ -631,12 +637,6 @@ def predict_next_maintenance_view(request):
     })
     return Response(result)
 
-@api_view(['POST'])
-@permission_classes([IsAuthenticated])
-def train_model_view(request):
-    """Vue API : réentraîner le modèle IA"""
-    model, message = train_model()
-    return Response({"message": message})
 
 
 
@@ -645,20 +645,12 @@ def train_model_view(request):
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from .ml_predictor import predict_all_maintenances, train_model
-
-
-@api_view(['GET'])
-@permission_classes([])
-def predict_all_maintenances_view(request):
-    """Vue API : prédire la prochaine maintenance pour chaque équipement"""
-    results = predict_all_maintenances()
-    return Response(results)
-
+from .ml_predictor import predict_next_maintenance
 
 @api_view(['POST'])
-@permission_classes([IsAuthenticated])
-def train_model_view(request):
-    """Vue API : réentraîner le modèle IA"""
-    model, message = train_model()
-    return Response({"message": message})
+@permission_classes([])  # tu peux ajouter IsAuthenticated si tu veux sécuriser
+def predict_all_maintenances_view(request):
+    """Vue API : prédire la prochaine maintenance pour chaque équipement"""
+    data = request.data  # on récupère les équipements envoyés du front
+    results = predict_next_maintenance(data)
+    return Response(results)

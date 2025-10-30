@@ -804,6 +804,46 @@ def rapport_create(request):
     else:
         form = RapportSurveillanceForm()
     return render(request, 'rapport_form.html', {'form': form})
+# ========== MODULE IA : PREDICTION MULTIPLE DES MAINTENANCES ==========
+from django.http import JsonResponse
+from .ml_predictor import predict_next_maintenance
+from .models import Maintenance, SiteClient
+
+@login_required
+@api_view(['GET'])
+def predict_all_maintenance(request):
+    from .models import Maintenance
+    from .ml_predictor import predict_next_maintenance
+    import datetime
+
+    maintenances = Maintenance.objects.all()
+    predictions = []
+
+    for maintenance in maintenances:
+        try:
+            result = predict_next_maintenance({
+                "type_maintenance": maintenance.type_maintenance,
+                "equipement": str(maintenance.equipement),
+                "site_nom": maintenance.site_nom,
+                "duree_estimee": maintenance.duree_estimee or 1,
+                "priorite": maintenance.priorite or "moyenne",
+                "statut": maintenance.statut or "planifiee",
+                "cout_estime": maintenance.cout_estime or 0,
+            })
+
+            if result:
+                predictions.append({
+                    "equipement": str(maintenance.equipement),
+                    "site": maintenance.site_nom,
+                    "predicted_days": result.get("predicted_days"),
+                    "recommended_date": result.get("recommended_date"),
+                })
+        except Exception as e:
+            print(f"Erreur pour {maintenance.equipement} : {e}")
+
+    # ✅ on renvoie toute la liste des prédictions
+    return Response(predictions)
+
 
 
 
