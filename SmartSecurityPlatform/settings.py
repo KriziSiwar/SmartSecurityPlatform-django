@@ -19,7 +19,7 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-1-vqr2jzrigg-j4ue_sdseaom-
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
 
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1,smart-security-backend.onrender.com').split(',')
 
 # Application definition
 INSTALLED_APPS = [
@@ -110,8 +110,14 @@ LOGIN_URL = 'login'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# ========== CORS SETTINGS (PLUS PERMISSIF) ==========
-CORS_ALLOW_ALL_ORIGINS = True
+# ========== CORS SETTINGS ==========
+CORS_ALLOWED_ORIGINS = [
+    "https://smart-security-frontend.onrender.com",
+    "http://localhost:5173",  # Pour le dev local
+    "http://localhost:3000",
+    "http://127.0.0.1:5173",
+    "http://127.0.0.1:3000",
+]
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_HEADERS = [
     'accept',
@@ -133,8 +139,10 @@ CORS_ALLOW_METHODS = [
     'PUT',
 ]
 
-# ========== CSRF SETTINGS (DÉSACTIVÉ POUR API) ==========
+# ========== CSRF SETTINGS ==========
 CSRF_TRUSTED_ORIGINS = [
+    'https://smart-security-frontend.onrender.com',
+    'https://smart-security-backend.onrender.com',
     'http://localhost:3000',
     'http://127.0.0.1:3000',
     'http://localhost:5173',
