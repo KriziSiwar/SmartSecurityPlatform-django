@@ -1,0 +1,1 @@
+web: gunicorn SmartSecurityPlatform.wsgi --log-file -
