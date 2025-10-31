@@ -13,8 +13,7 @@ import {
   Paper,
 } from '@mui/material';
 import { ArrowBack as ArrowBackIcon } from '@mui/icons-material';
-import axios from 'axios';
-
+import api from '../../utils/axiosConfig';
 const EventForm = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -45,7 +44,7 @@ const EventForm = () => {
 
   const fetchSites = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/api/sites/');
+      const response = await api.get('/api/sites/');
       const data = response.data.results || response.data;
       setSites(Array.isArray(data) ? data : []);
     } catch (error) {
@@ -56,7 +55,7 @@ const EventForm = () => {
 
   const fetchCameras = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/api/cameras/');
+      const response = await api.get('/api/cameras/');
       const data = response.data.results || response.data;
       setCameras(Array.isArray(data) ? data : []);
     } catch (error) {
@@ -67,7 +66,7 @@ const EventForm = () => {
 
   const fetchCapteurs = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/api/capteurs/');
+      const response = await api.get('/api/capteurs/');
       const data = response.data.results || response.data;
       setCapteurs(Array.isArray(data) ? data : []);
     } catch (error) {
@@ -78,7 +77,7 @@ const EventForm = () => {
 
   const fetchEvent = async () => {
     try {
-      const response = await axios.get(`http://localhost:8000/api/evenements/${id}/`);
+      const response = await api.get(`/api/evenements/${id}/`);
       setFormData({
         type_evenement: response.data.type_evenement || '',
         description: response.data.description || '',
@@ -107,9 +106,9 @@ const EventForm = () => {
 
     try {
       if (isEditing) {
-        await axios.put(`http://localhost:8000/api/evenements/${id}/`, formData);
+        await api.put(`/api/evenements/${id}/`, formData);
       } else {
-        await axios.post('http://localhost:8000/api/evenements/', formData);
+        await api.post('/api/evenements/', formData);
       }
       navigate('/events');
     } catch (error) {

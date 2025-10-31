@@ -23,8 +23,7 @@ import {
   Delete as DeleteIcon,
   ArrowBack as ArrowBackIcon,
 } from '@mui/icons-material';
-import axios from 'axios';
-
+import api from '../../utils/axiosConfig';
 const CameraDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -38,7 +37,7 @@ const CameraDetail = () => {
 
   const fetchCamera = async () => {
     try {
-      const response = await axios.get(`http://localhost:8000/api/cameras/${id}/`);
+      const response = await api.get(`/api/cameras/${id}/`);
       setCamera(response.data);
       setEvenements(response.data.evenements || []);
     } catch (error) {
@@ -51,7 +50,7 @@ const CameraDetail = () => {
   const handleDelete = async () => {
     if (window.confirm('Êtes-vous sûr de vouloir supprimer cette caméra ?')) {
       try {
-        await axios.delete(`http://localhost:8000/api/cameras/${id}/`);
+        await api.delete(`/api/cameras/${id}/`);
         navigate('/cameras');
       } catch (error) {
         console.error('Error deleting camera:', error);

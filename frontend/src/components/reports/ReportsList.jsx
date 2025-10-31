@@ -26,8 +26,7 @@ import {
   Delete as DeleteIcon,
   Visibility as VisibilityIcon,
 } from '@mui/icons-material';
-import axios from 'axios';
-
+import api from '../../utils/axiosConfig';
 const ReportsList = () => {
   const [reports, setReports] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -48,7 +47,7 @@ const ReportsList = () => {
       if (filters.site) params.append('site', filters.site);
       if (filters.periode) params.append('periode', filters.periode);
 
-      const response = await axios.get(`http://localhost:8000/api/rapports/?${params}`);
+      const response = await api.get(`/api/rapports/?${params}`);
       const data = response.data.results || response.data;
       setReports(Array.isArray(data) ? data : []);
     } catch (error) {
@@ -68,7 +67,7 @@ const ReportsList = () => {
   const handleDelete = async (id) => {
     if (window.confirm('Êtes-vous sûr de vouloir supprimer ce rapport ?')) {
       try {
-        await axios.delete(`http://localhost:8000/api/rapports/${id}/`);
+        await api.delete(`/api/rapports/${id}/`);
         fetchReports();
       } catch (error) {
         console.error('Error deleting report:', error);

@@ -30,8 +30,7 @@ import {
   Delete as DeleteIcon,
   Visibility as VisibilityIcon,
 } from '@mui/icons-material';
-import axios from 'axios';
-
+import api from '../../utils/axiosConfig';
 const MaintenancesList = () => {
   const [maintenances, setMaintenances] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -58,7 +57,7 @@ const MaintenancesList = () => {
       if (filters.date_debut) params.append('date_debut', filters.date_debut);
       if (filters.date_fin) params.append('date_fin', filters.date_fin);
 
-      const response = await axios.get(`http://localhost:8000/api/maintenances/?${params}`);
+      const response = await api.get(`/api/maintenances/?${params}`);
       const data = response.data.results || response.data;
       const maintenancesArray = Array.isArray(data) ? data : [];
       setMaintenances(maintenancesArray);
@@ -86,7 +85,7 @@ const MaintenancesList = () => {
   const handleDelete = async (id) => {
     if (window.confirm('Êtes-vous sûr de vouloir supprimer cette maintenance ?')) {
       try {
-        await axios.delete(`http://localhost:8000/api/maintenances/${id}/`);
+        await api.delete(`/api/maintenances/${id}/`);
         fetchMaintenances();
       } catch (error) {
         console.error('Error deleting maintenance:', error);
@@ -112,7 +111,7 @@ const MaintenancesList = () => {
   // 🧠 Nouvelle fonction IA : prédire la prochaine maintenance pour CHAQUE équipement
   const handlePredictAI = async () => {
     try {
-      const res = await axios.get("http://127.0.0.1:8000/api/predict-all-maintenance/");
+      const res = await api.get("http://127.0.0.1:8000/api/predict-all-maintenance/");
 
       const predictionsData = res.data;
 

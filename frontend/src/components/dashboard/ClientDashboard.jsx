@@ -23,8 +23,7 @@ import {
   Notifications as NotificationsIcon,
   Security as SecurityIcon,
 } from '@mui/icons-material';
-import axios from 'axios';
-
+import api from '../../utils/axiosConfig';
 const ClientDashboard = () => {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -35,7 +34,7 @@ const ClientDashboard = () => {
 
   const fetchStats = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/api/dashboard/stats/');
+      const response = await api.get('/api/dashboard/stats/');
       setStats(response.data);
     } catch (error) {
       console.error('Error fetching dashboard stats:', error);

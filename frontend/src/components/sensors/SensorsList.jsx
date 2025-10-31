@@ -30,8 +30,7 @@ import {
   Delete as DeleteIcon,
   Visibility as VisibilityIcon,
 } from '@mui/icons-material';
-import axios from 'axios';
-
+import api from '../../utils/axiosConfig';
 const SensorsList = () => {
   const [sensors, setSensors] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -55,7 +54,7 @@ const SensorsList = () => {
       if (filters.type) params.append('type', filters.type);
       if (filters.statut) params.append('statut', filters.statut);
 
-      const response = await axios.get(`http://localhost:8000/api/capteurs/?${params}`);
+      const response = await api.get(`/api/capteurs/?${params}`);
       const data = response.data.results || response.data;
       const sensorsArray = Array.isArray(data) ? data : [];
       setSensors(sensorsArray);
@@ -84,7 +83,7 @@ const SensorsList = () => {
   const handleDelete = async (id) => {
     if (window.confirm('Êtes-vous sûr de vouloir supprimer ce capteur ?')) {
       try {
-        await axios.delete(`http://localhost:8000/api/capteurs/${id}/`);
+        await api.delete(`/api/capteurs/${id}/`);
         fetchSensors();
       } catch (error) {
         console.error('Error deleting sensor:', error);

@@ -16,8 +16,7 @@ import {
   Delete as DeleteIcon,
   ArrowBack as ArrowBackIcon,
 } from '@mui/icons-material';
-import axios from 'axios';
-
+import api from '../../utils/axiosConfig';
 const ReportDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -30,7 +29,7 @@ const ReportDetail = () => {
 
   const fetchReport = async () => {
     try {
-      const response = await axios.get(`http://localhost:8000/api/rapports/${id}/`);
+      const response = await api.get(`/api/rapports/${id}/`);
       setReport(response.data);
     } catch (error) {
       console.error('Error fetching report:', error);
@@ -42,7 +41,7 @@ const ReportDetail = () => {
   const handleDelete = async () => {
     if (window.confirm('Êtes-vous sûr de vouloir supprimer ce rapport ?')) {
       try {
-        await axios.delete(`http://localhost:8000/api/rapports/${id}/`);
+        await api.delete(`/api/rapports/${id}/`);
         navigate('/reports');
       } catch (error) {
         console.error('Error deleting report:', error);

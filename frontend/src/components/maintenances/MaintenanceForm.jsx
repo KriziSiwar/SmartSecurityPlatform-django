@@ -13,8 +13,7 @@ import {
   Paper,
 } from '@mui/material';
 import { ArrowBack as ArrowBackIcon } from '@mui/icons-material';
-import axios from 'axios';
-
+import api from '../../utils/axiosConfig';
 const MaintenanceForm = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -47,7 +46,7 @@ const MaintenanceForm = () => {
 
   const fetchSites = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/api/sites/');
+      const response = await api.get('/api/sites/');
       setSites(Array.isArray(response.data) ? response.data : response.data.results || []);
     } catch (error) {
       console.error('Error fetching sites:', error);
@@ -58,7 +57,7 @@ const MaintenanceForm = () => {
   const fetchTechniciens = async () => {
     try {
       // Fetch users with role 'technicien'
-      const response = await axios.get('http://localhost:8000/api/auth/techniciens/');
+      const response = await api.get('/api/auth/techniciens/');
       setTechniciens(Array.isArray(response.data) ? response.data : response.data.results || []);
     } catch (error) {
       console.error('Error fetching techniciens:', error);
@@ -68,7 +67,7 @@ const MaintenanceForm = () => {
 
   const fetchMaintenance = async () => {
     try {
-      const response = await axios.get(`http://localhost:8000/api/maintenances/${id}/`);
+      const response = await api.get(`/api/maintenances/${id}/`);
       setFormData({
         type_maintenance: response.data.type_maintenance || 'preventive',
         equipement: response.data.equipement || '',
@@ -101,9 +100,9 @@ const MaintenanceForm = () => {
 
     try {
       if (isEditing) {
-        await axios.put(`http://localhost:8000/api/maintenances/${id}/`, formData);
+        await api.put(`/api/maintenances/${id}/`, formData);
       } else {
-        await axios.post('http://localhost:8000/api/maintenances/', formData);
+        await api.post('/api/maintenances/', formData);
       }
       navigate('/maintenances');
     } catch (error) {

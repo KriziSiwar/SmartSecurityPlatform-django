@@ -33,8 +33,7 @@ import {
   Build as BuildIcon,
   CheckCircle as CheckCircleIcon,
 } from '@mui/icons-material';
-import axios from 'axios';
-
+import api from '../../utils/axiosConfig';
 const AITestPage = () => {
   const [message, setMessage] = useState('');
   const [prediction, setPrediction] = useState(null);
@@ -90,7 +89,7 @@ const AITestPage = () => {
     setShowResult(false);
 
     try {
-      const response = await axios.post('http://localhost:8000/api/classify-alert/', {
+      const response = await api.post('/api/classify-alert/', {
         message: msgToClassify
       });
 

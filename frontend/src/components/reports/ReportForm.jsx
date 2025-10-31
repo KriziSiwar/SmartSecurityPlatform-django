@@ -13,8 +13,7 @@ import {
   Paper,
 } from '@mui/material';
 import { ArrowBack as ArrowBackIcon } from '@mui/icons-material';
-import axios from 'axios';
-
+import api from '../../utils/axiosConfig';
 const ReportForm = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -38,7 +37,7 @@ const ReportForm = () => {
 
   const fetchSites = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/api/sites/');
+      const response = await api.get('/api/sites/');
       const data = response.data.results || response.data;
       setSites(Array.isArray(data) ? data : []);
     } catch (error) {
@@ -49,7 +48,7 @@ const ReportForm = () => {
 
   const fetchReport = async () => {
     try {
-      const response = await axios.get(`http://localhost:8000/api/rapports/${id}/`);
+      const response = await api.get(`/api/rapports/${id}/`);
       setFormData({
         titre: response.data.titre || '',
         contenu: response.data.contenu || '',
@@ -75,9 +74,9 @@ const ReportForm = () => {
 
     try {
       if (isEditing) {
-        await axios.put(`http://localhost:8000/api/rapports/${id}/`, formData);
+        await api.put(`/api/rapports/${id}/`, formData);
       } else {
-        await axios.post('http://localhost:8000/api/rapports/', formData);
+        await api.post('/api/rapports/', formData);
       }
       navigate('/reports');
     } catch (error) {

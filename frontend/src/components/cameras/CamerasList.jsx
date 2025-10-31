@@ -30,8 +30,7 @@ import {
   Delete as DeleteIcon,
   Visibility as VisibilityIcon,
 } from '@mui/icons-material';
-import axios from 'axios';
-
+import api from '../../utils/axiosConfig';
 const CamerasList = () => {
   const [cameras, setCameras] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -55,7 +54,7 @@ const CamerasList = () => {
       if (filters.etat) params.append('etat', filters.etat);
       if (filters.type) params.append('type', filters.type);
 
-      const response = await axios.get(`http://localhost:8000/api/cameras/?${params}`);
+      const response = await api.get(`/api/cameras/?${params}`);
       const data = response.data.results || response.data;
       const camerasArray = Array.isArray(data) ? data : [];
       setCameras(camerasArray);
@@ -84,7 +83,7 @@ const CamerasList = () => {
   const handleDelete = async (id) => {
     if (window.confirm('Êtes-vous sûr de vouloir supprimer cette caméra ?')) {
       try {
-        await axios.delete(`http://localhost:8000/api/cameras/${id}/`);
+        await api.delete(`/api/cameras/${id}/`);
         fetchCameras();
       } catch (error) {
         console.error('Error deleting camera:', error);

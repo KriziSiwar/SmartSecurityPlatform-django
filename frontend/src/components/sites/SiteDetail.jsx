@@ -42,8 +42,7 @@ import {
   Person as PersonIcon, // Ajout de l'import manquant
 } from '@mui/icons-material';
 import { keyframes } from '@emotion/react';
-import axios from 'axios';
-
+import api from '../../utils/axiosConfig';
 // Animations
 const fadeIn = keyframes`
   from { opacity: 0; transform: translateY(20px); }
@@ -78,11 +77,11 @@ const SiteDetail = () => {
       setLoading(true);
       
       const [siteResponse, camerasResponse, capteursResponse, evenementsResponse, alertesResponse] = await Promise.all([
-        axios.get(`http://localhost:8000/api/sites/${id}/`),
-        axios.get(`http://localhost:8000/api/cameras/?site=${id}`),
-        axios.get(`http://localhost:8000/api/capteurs/?site=${id}`),
-        axios.get(`http://localhost:8000/api/evenements/?site=${id}`),
-        axios.get(`http://localhost:8000/api/alertes/?site=${id}`),
+        api.get(`/api/sites/${id}/`),
+        api.get(`/api/cameras/?site=${id}`),
+        api.get(`/api/capteurs/?site=${id}`),
+        api.get(`/api/evenements/?site=${id}`),
+        api.get(`/api/alertes/?site=${id}`),
       ]);
 
       setSite(siteResponse.data);
@@ -103,7 +102,7 @@ const SiteDetail = () => {
   const handleDelete = async () => {
     if (window.confirm('Êtes-vous sûr de vouloir supprimer ce site ?')) {
       try {
-        await axios.delete(`http://localhost:8000/api/sites/${id}/`);
+        await api.delete(`/api/sites/${id}/`);
         navigate('/sites');
       } catch (error) {
         console.error('Error deleting site:', error);

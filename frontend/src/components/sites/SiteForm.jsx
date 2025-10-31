@@ -15,7 +15,7 @@ import {
   Alert,
 } from '@mui/material';
 import { Save as SaveIcon, ArrowBack as ArrowBackIcon } from '@mui/icons-material';
-import axios from 'axios';
+import api from '../../utils/axiosConfig';
 import { useAuth } from '../../contexts/AuthContext';
 
 const SiteForm = () => {
@@ -44,7 +44,7 @@ const SiteForm = () => {
 
   const fetchSite = async () => {
     try {
-      const response = await axios.get(`http://localhost:8000/api/sites/${id}/`);
+      const response = await api.get(`/api/sites/${id}/`);
       setFormData(response.data);
     } catch (error) {
       console.error('Error fetching site:', error);
@@ -74,10 +74,10 @@ const SiteForm = () => {
 
     try {
       if (isEditing) {
-        await axios.put(`http://localhost:8000/api/sites/${id}/`, formData);
+        await api.put(`/api/sites/${id}/`, formData);
         setSuccess('Site modifié avec succès');
       } else {
-        const response = await axios.post('http://localhost:8000/api/sites/', formData);
+        const response = await api.post('/api/sites/', formData);
         setSuccess('Site créé avec succès');
         setTimeout(() => {
           navigate(`/sites/${response.data.id}`);

@@ -30,8 +30,7 @@ import {
   Warning as WarningIcon,
   CheckCircle as CheckCircleIcon,
 } from '@mui/icons-material';
-import axios from 'axios';
-
+import api from '../../utils/axiosConfig';
 const AlertForm = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -74,8 +73,8 @@ const AlertForm = () => {
 
   const fetchData = async () => {
     try {
-      const evenementsResponse = await axios.get('http://localhost:8000/api/evenements/');
-      const usersResponse = await axios.get('http://localhost:8000/api/auth/users/');
+      const evenementsResponse = await api.get('/api/evenements/');
+      const usersResponse = await api.get('/api/auth/users/');
 
       setEvenements(evenementsResponse.data.results || evenementsResponse.data);
       setUsers(usersResponse.data.results || usersResponse.data);
@@ -86,7 +85,7 @@ const AlertForm = () => {
 
   const fetchAlert = async () => {
     try {
-      const response = await axios.get(`http://localhost:8000/api/alertes/${id}/`);
+      const response = await api.get(`/api/alertes/${id}/`);
       setFormData({
         evenement: response.data.evenement,
         destinataire: response.data.destinataire,
@@ -104,7 +103,7 @@ const AlertForm = () => {
     setAiPrediction(null);
     
     try {
-      const response = await axios.post('http://localhost:8000/api/alertes/classify/', {
+      const response = await axios.post('/api/alertes/classify/', {
         message: formData.message
       });
       
@@ -155,10 +154,10 @@ const AlertForm = () => {
 
     try {
       if (isEditing) {
-        await axios.put(`http://localhost:8000/api/alertes/${id}/`, formData);
+        await axios.put(`/api/alertes/${id}/`, formData);
         setSuccess('Alerte modifiée avec succès');
       } else {
-        const response = await axios.post('http://localhost:8000/api/alertes/', formData);
+        const response = await axios.post('/api/alertes/', formData);
         setSuccess('Alerte créée avec succès');
         setTimeout(() => {
           navigate(`/alerts/${response.data.id}`);

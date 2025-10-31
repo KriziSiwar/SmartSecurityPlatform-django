@@ -30,8 +30,7 @@ import {
   Delete as DeleteIcon,
   Visibility as VisibilityIcon,
 } from '@mui/icons-material';
-import axios from 'axios';
-
+import api from '../../utils/axiosConfig';
 const EventsList = () => {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -57,7 +56,7 @@ const EventsList = () => {
       if (filters.niveau_urgence) params.append('niveau_urgence', filters.niveau_urgence);
       if (filters.statut) params.append('statut', filters.statut);
 
-      const response = await axios.get(`http://localhost:8000/api/evenements/?${params}`);
+      const response = await api.get(`/api/evenements/?${params}`);
       const data = response.data.results || response.data;
       const eventsArray = Array.isArray(data) ? data : [];
       setEvents(eventsArray);
@@ -86,7 +85,7 @@ const EventsList = () => {
   const handleDelete = async (id) => {
     if (window.confirm('Êtes-vous sûr de vouloir supprimer cet événement ?')) {
       try {
-        await axios.delete(`http://localhost:8000/api/evenements/${id}/`);
+        await api.delete(`/api/evenements/${id}/`);
         fetchEvents();
       } catch (error) {
         console.error('Error deleting event:', error);
@@ -96,7 +95,7 @@ const EventsList = () => {
 
   const handleResoudre = async (id) => {
     try {
-      await axios.post(`http://localhost:8000/api/evenements/${id}/resoudre/`);
+      await api.post(`/api/evenements/${id}/resoudre/`);
       fetchEvents();
     } catch (error) {
       console.error('Error resolving event:', error);

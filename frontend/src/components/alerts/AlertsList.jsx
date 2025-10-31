@@ -55,8 +55,7 @@ import {
   Email as EmailIcon,
 } from '@mui/icons-material';
 import { keyframes } from '@emotion/react';
-import axios from 'axios';
-
+import api from '../../utils/axiosConfig';
 // Animations
 const pulse = keyframes`
   0% { transform: scale(1); }
@@ -100,7 +99,7 @@ const AlertsList = () => {
       if (filters.categorie_ia) params.append('categorie_ia', filters.categorie_ia);
       if (filters.search) params.append('search', filters.search);
 
-      const response = await axios.get(`http://localhost:8000/api/alertes/?${params}`);
+      const response = await api.get(`/api/alertes/?${params}`);
       const data = response.data.results || response.data;
       const alertsArray = Array.isArray(data) ? data : [];
       setAlerts(alertsArray);
@@ -136,7 +135,7 @@ const AlertsList = () => {
   const handleDelete = async (id) => {
     if (window.confirm('Êtes-vous sûr de vouloir supprimer cette alerte ?')) {
       try {
-        await axios.delete(`http://localhost:8000/api/alertes/${id}/`);
+        await api.delete(`/api/alertes/${id}/`);
         fetchAlerts();
       } catch (error) {
         console.error('Error deleting alert:', error);
@@ -147,7 +146,7 @@ const AlertsList = () => {
 
   const handleMarquerLue = async (id) => {
     try {
-      await axios.post(`http://localhost:8000/api/alertes/${id}/marquer_lue/`);
+      await api.post(`/api/alertes/${id}/marquer_lue/`);
       fetchAlerts();
     } catch (error) {
       console.error('Error marking alert as read:', error);
@@ -157,7 +156,7 @@ const AlertsList = () => {
 
   const handleArchiver = async (id) => {
     try {
-      await axios.post(`http://localhost:8000/api/alertes/${id}/archiver/`);
+      await api.post(`/api/alertes/${id}/archiver/`);
       fetchAlerts();
     } catch (error) {
       console.error('Error archiving alert:', error);

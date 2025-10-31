@@ -13,8 +13,7 @@ import {
   Paper,
 } from '@mui/material';
 import { ArrowBack as ArrowBackIcon } from '@mui/icons-material';
-import axios from 'axios';
-
+import api from '../../utils/axiosConfig';
 const SensorForm = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -39,7 +38,7 @@ const SensorForm = () => {
 
   const fetchSites = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/api/sites/');
+      const response = await api.get('/api/sites/');
       const data = response.data.results || response.data;
       setSites(Array.isArray(data) ? data : []);
     } catch (error) {
@@ -50,7 +49,7 @@ const SensorForm = () => {
 
   const fetchSensor = async () => {
     try {
-      const response = await axios.get(`http://localhost:8000/api/capteurs/${id}/`);
+      const response = await api.get(`/api/capteurs/${id}/`);
       setFormData({
         site: response.data.site || '',
         type: response.data.type || 'mouvement',
@@ -77,9 +76,9 @@ const SensorForm = () => {
 
     try {
       if (isEditing) {
-        await axios.put(`http://localhost:8000/api/capteurs/${id}/`, formData);
+        await api.put(`/api/capteurs/${id}/`, formData);
       } else {
-        await axios.post('http://localhost:8000/api/capteurs/', formData);
+        await api.post('/api/capteurs/', formData);
       }
       navigate('/sensors');
     } catch (error) {

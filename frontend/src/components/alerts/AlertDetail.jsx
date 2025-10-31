@@ -41,8 +41,7 @@ import {
   Schedule as ScheduleIcon,
 } from '@mui/icons-material';
 import { keyframes } from '@emotion/react';
-import axios from 'axios';
-
+import api from '../../utils/axiosConfig';
 // Animations
 const fadeIn = keyframes`
   from { opacity: 0; transform: translateY(20px); }
@@ -72,7 +71,7 @@ const AlertDetail = () => {
     try {
       setError(null);
       setLoading(true);
-      const response = await axios.get(`http://localhost:8000/api/alertes/${id}/`);
+      const response = await api.get(`/api/alertes/${id}/`);
       setAlert(response.data);
     } catch (error) {
       console.error('Error fetching alert:', error);
@@ -86,7 +85,7 @@ const AlertDetail = () => {
     if (window.confirm('Êtes-vous sûr de vouloir supprimer cette alerte ?')) {
       try {
         setActionLoading(true);
-        await axios.delete(`http://localhost:8000/api/alertes/${id}/`);
+        await api.delete(`/api/alertes/${id}/`);
         navigate('/alerts');
       } catch (error) {
         console.error('Error deleting alert:', error);
@@ -100,7 +99,7 @@ const AlertDetail = () => {
   const handleMarquerLue = async () => {
     try {
       setActionLoading(true);
-      await axios.post(`http://localhost:8000/api/alertes/${id}/marquer_lue/`);
+      await api.post(`/api/alertes/${id}/marquer_lue/`);
       await fetchAlert();
     } catch (error) {
       console.error('Error marking alert as read:', error);
@@ -113,7 +112,7 @@ const AlertDetail = () => {
   const handleArchiver = async () => {
     try {
       setActionLoading(true);
-      await axios.post(`http://localhost:8000/api/alertes/${id}/archiver/`);
+      await api.post(`/api/alertes/${id}/archiver/`);
       await fetchAlert();
     } catch (error) {
       console.error('Error archiving alert:', error);

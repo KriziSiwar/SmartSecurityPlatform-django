@@ -24,8 +24,7 @@ import {
   People as PeopleIcon,
   TrendingUp as TrendingUpIcon,
 } from '@mui/icons-material';
-import axios from 'axios';
-
+import api from '../../utils/axiosConfig';
 const AdminDashboard = () => {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -36,7 +35,7 @@ const AdminDashboard = () => {
 
   const fetchStats = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/api/dashboard/stats/');
+      const response = await api.get('/api/dashboard/stats/');
       setStats(response.data);
     } catch (error) {
       console.error('Error fetching dashboard stats:', error);

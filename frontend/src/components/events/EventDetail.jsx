@@ -23,8 +23,7 @@ import {
   Delete as DeleteIcon,
   ArrowBack as ArrowBackIcon,
 } from '@mui/icons-material';
-import axios from 'axios';
-
+import api from '../../utils/axiosConfig';
 const EventDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -38,7 +37,7 @@ const EventDetail = () => {
 
   const fetchEvent = async () => {
     try {
-      const response = await axios.get(`http://localhost:8000/api/evenements/${id}/`);
+      const response = await api.get(`/api/evenements/${id}/`);
       setEvent(response.data);
       setAlertes(response.data.alertes || []);
     } catch (error) {
@@ -51,7 +50,7 @@ const EventDetail = () => {
   const handleDelete = async () => {
     if (window.confirm('Êtes-vous sûr de vouloir supprimer cet événement ?')) {
       try {
-        await axios.delete(`http://localhost:8000/api/evenements/${id}/`);
+        await api.delete(`/api/evenements/${id}/`);
         navigate('/events');
       } catch (error) {
         console.error('Error deleting event:', error);
@@ -61,7 +60,7 @@ const EventDetail = () => {
 
   const handleResoudre = async () => {
     try {
-      await axios.post(`http://localhost:8000/api/evenements/${id}/resoudre/`);
+      await api.post(`/api/evenements/${id}/resoudre/`);
       fetchEvent();
     } catch (error) {
       console.error('Error resolving event:', error);

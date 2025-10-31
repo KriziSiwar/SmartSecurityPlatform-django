@@ -13,8 +13,7 @@ import {
   Paper,
 } from '@mui/material';
 import { ArrowBack as ArrowBackIcon } from '@mui/icons-material';
-import axios from 'axios';
-
+import api from '../../utils/axiosConfig';
 const CameraForm = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -42,7 +41,7 @@ const CameraForm = () => {
 
   const fetchSites = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/api/sites/');
+      const response = await api.get('/api/sites/');
       const data = response.data.results || response.data;
       setSites(Array.isArray(data) ? data : []);
     } catch (error) {
@@ -53,7 +52,7 @@ const CameraForm = () => {
 
   const fetchCamera = async () => {
     try {
-      const response = await axios.get(`http://localhost:8000/api/cameras/${id}/`);
+      const response = await api.get(`/api/cameras/${id}/`);
       setFormData({
         nom: response.data.nom || '',
         site: response.data.site || '',
@@ -83,9 +82,9 @@ const CameraForm = () => {
 
     try {
       if (isEditing) {
-        await axios.put(`http://localhost:8000/api/cameras/${id}/`, formData);
+        await api.put(`/api/cameras/${id}/`, formData);
       } else {
-        await axios.post('http://localhost:8000/api/cameras/', formData);
+        await api.post('/api/cameras/', formData);
       }
       navigate('/cameras');
     } catch (error) {

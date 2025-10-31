@@ -23,8 +23,7 @@ import {
   Delete as DeleteIcon,
   ArrowBack as ArrowBackIcon,
 } from '@mui/icons-material';
-import axios from 'axios';
-
+import api from '../../utils/axiosConfig';
 const SensorDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -38,7 +37,7 @@ const SensorDetail = () => {
 
   const fetchSensor = async () => {
     try {
-      const response = await axios.get(`http://localhost:8000/api/capteurs/${id}/`);
+      const response = await api.get(`/api/capteurs/${id}/`);
       setSensor(response.data);
       setEvenements(response.data.evenements || []);
     } catch (error) {
@@ -51,7 +50,7 @@ const SensorDetail = () => {
   const handleDelete = async () => {
     if (window.confirm('Êtes-vous sûr de vouloir supprimer ce capteur ?')) {
       try {
-        await axios.delete(`http://localhost:8000/api/capteurs/${id}/`);
+        await api.delete(`/api/capteurs/${id}/`);
         navigate('/sensors');
       } catch (error) {
         console.error('Error deleting sensor:', error);

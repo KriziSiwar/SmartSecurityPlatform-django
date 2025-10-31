@@ -17,8 +17,7 @@ import {
   Delete as DeleteIcon,
   ArrowBack as ArrowBackIcon,
 } from '@mui/icons-material';
-import axios from 'axios';
-
+import api from '../../utils/axiosConfig';
 const MaintenanceDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -31,7 +30,7 @@ const MaintenanceDetail = () => {
 
   const fetchMaintenance = async () => {
     try {
-      const response = await axios.get(`http://localhost:8000/api/maintenances/${id}/`);
+      const response = await api.get(`/api/maintenances/${id}/`);
       setMaintenance(response.data);
     } catch (error) {
       console.error('Error fetching maintenance:', error);
@@ -43,7 +42,7 @@ const MaintenanceDetail = () => {
   const handleDelete = async () => {
     if (window.confirm('Êtes-vous sûr de vouloir supprimer cette maintenance ?')) {
       try {
-        await axios.delete(`http://localhost:8000/api/maintenances/${id}/`);
+        await api.delete(`/api/maintenances/${id}/`);
         navigate('/maintenances');
       } catch (error) {
         console.error('Error deleting maintenance:', error);
